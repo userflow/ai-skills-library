@@ -1,0 +1,33 @@
+name: validate
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Validate skill-spec compliance (frontmatter structure, name/description constraints).
+      - name: Validate skill spec (skills-ref)
+        run: |
+          for skill in skills/*/; do
+            echo "→ Validating $skill"
+            npx --yes skills-ref validate "$skill"
+          done
+
+      # Claude Code packaging: marketplace.json + plugin.json + skill frontmatter.
+      # --strict treats warnings (non-kebab-case names, unknown fields) as errors.
+      - name: Install Claude Code
+        run: npm install --global @anthropic-ai/claude-code
+
+      - name: Validate Claude Code plugin packaging
+        run: claude plugin validate . --strict

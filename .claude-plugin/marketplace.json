@@ -1,0 +1,16 @@
+{
+  "name": "ai-skills-library",
+  "owner": {
+    "name": "Userflow",
+    "email": "support@userflow.com"
+  },
+  "description": "Userflow's library of Agent Skills for AI coding agents.",
+  "plugins": [
+    {
+      "name": "userflow",
+      "source": ".",
+      "description": "Userflow skills for AI coding agents.",
+      "keywords": ["userflow", "product-adoption", "installation"]
+    }
+  ]
+}

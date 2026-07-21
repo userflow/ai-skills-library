@@ -1,0 +1,12 @@
+{
+  "name": "userflow",
+  "description": "Userflow skills for AI coding agents.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Userflow",
+    "url": "https://userflow.com"
+  },
+  "homepage": "https://github.com/userflow/ai-skills-library",
+  "repository": "https://github.com/userflow/ai-skills-library",
+  "keywords": ["userflow", "product-adoption", "installation"]
+}
