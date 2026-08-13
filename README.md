@@ -1,5 +1,7 @@
 # Userflow AI Skills Library
 
+[![skills.sh](https://skills.sh/b/userflow/ai-skills-library)](https://skills.sh/userflow/ai-skills-library)
+
 **Install Userflow with AI.** This repository packages Userflow's Agent Skills so AI coding agents can install and
 configure Userflow in your codebase for you.
 
@@ -48,5 +50,5 @@ Cursor, Codex, and others. Adjust the destination directory for your agent.
 Point your agent at the raw skill file:
 
 ```
-https://raw.githubusercontent.com/userflow/ai-skills-library/main/skills/install-with-ai/SKILL.md
+https://raw.githubusercontent.com/userflow/ai-skills-library/refs/heads/main/skills/install-with-ai/SKILL.md
 ```
