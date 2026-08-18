@@ -3,7 +3,7 @@ name: install-with-ai
 description: Installs Userflow.js into new or existing applications. Default install is init() + identify() (after sign-in/sign-up) + reset() only. Use when someone wants to install Userflow, add Userflow.js, or wire Userflow into a codebase. Installation only — verifying an existing install or recommending attributes is out of scope.
 metadata:
   author: userflow
-  version: "1.0"
+  version: "1.1"
 ---
 
 # Userflow.js Installation
@@ -22,7 +22,7 @@ Install only, for a new or existing codebase. The default install is three calls
 2. **Keep it simple.** The default install is `init()` + `identify()` + `reset()`. Use any other function (`identifyAnonymous`, `group`, `track`, `setCustomNavigate`, `start`, identity verification) only when the customer explicitly asks — see Advanced.
 3. **Client-side only — requires a browser.** Userflow requires a browser to initialize; it is not built for server-side rendering. You may safely *import* the package from shared code (the import won't crash on the server), but `init()`, `identify()`, and `reset()` must be *called* only in the browser, never during server rendering — on the server there's no DOM, no browser session, and no way to show flows. In React Server Components / Next.js App Router, call them from a Client Component marked `"use client"`, not a Server Component.
 4. **One token per environment.** Each Userflow environment (Production, Staging) has its own token. Never use one environment's token in another.
-5. **No universal install.** Read the codebase and adapt placement to the actual framework. If you can't determine the framework, the auth flow, or the user ID, ask — don't guess.
+5. **No universal install.** Read the codebase and adapt placement to the actual framework. If you can't determine the framework, the auth flow, the user ID, or the environment token, ask — don't guess.
 6. **Never initialize twice.** If Userflow is already initialized in the codebase, do not generate new install code or rewrite the existing setup. Point to where the existing `init()` lives and do not continue with a new installation.
 7. **The user ID is the customer's choice.** Userflow accepts any stable, unique identifier the customer chooses. A database ID is recommended because changing the identifier later creates a *new* Userflow user — but don't restrict it; email is allowed if they want it.
 
@@ -54,7 +54,9 @@ The token comes from the Userflow UI, and someone with Userflow access can suppl
 1. **Settings → Environments** — copy the **Userflow.js Token** for the target environment.
 2. **Settings → Installation** — select the target environment and the install snippet appears with the token **already filled in** (NPM and HTML tabs, matching the method in 2.2). Whoever has access can click **"Copy all instructions (to send to a developer)"** to hand the full snippet — token included — to the developer doing the install. This is the easiest path when the person installing doesn't have Userflow access themselves. (The same page has a **Verify installation** button, which maps to Step 3.)
 
-Either way, use the token for the environment this build targets, and wire it through any existing environment config so each environment uses its own token (Core rule 4). Never hardcode a real production token into the repo — treat it as an environment value.
+Either way, use the token for the environment this build targets, and wire it through any existing environment config so each environment uses its own token (Core rule 4).
+
+**If the customer hasn't provided a token,** ask for it and point them to either location above. If they can't supply it right now, do not invent, guess, or reuse a token found elsewhere in the codebase, and do not leave a literal placeholder in the code. Instead, wire the token as an environment variable using the project's existing env config, leave the value unset, and tell the customer exactly which variable to set (and in which file) before the install will work. State clearly that Userflow content will not appear until that value is set.
 
 ### 2.2 Choose the install method
 
