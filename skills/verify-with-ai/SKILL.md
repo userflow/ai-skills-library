@@ -55,7 +55,7 @@ Evaluate each item against the code map. Record **Pass / Fix / Flag / Needs runt
 
 ### A. Initialization
 
-- **A1 — Exactly one `init()` execution path.** Two modules both initializing, npm *and* script-tag snippet both present, or an init inside a re-rendering component → **Fix, Critical**.
+- **A1 — Exactly one `init()` execution path.** Two modules both initializing, npm *and* script-tag snippet both present, or an init inside a re-rendering component → **Fix, High**.
 - **A2 — `init()` runs before other calls.** Any Userflow call reachable before `init()` → **Fix, High**. (The npm package and official snippet queue early calls, so this is about ordering logic, not race timing.)
 - **A3 — Client-side only.** `init()`/`identify()`/`reset()` *called* in server-executed code — a Server Component without `"use client"`, an SSR lifecycle, or server template logic that executes rather than emits the call → **Fix, High**. Server templates that *emit* the script for the browser to run are correct.
 
