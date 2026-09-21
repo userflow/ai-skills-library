@@ -3,7 +3,7 @@ name: install-with-ai
 description: Installs Userflow.js into new or existing applications. Default install is init() + identify() (after sign-in/sign-up) + reset() only. Use when someone wants to install Userflow, add Userflow.js, or wire Userflow into a codebase. Installation only — verifying an existing install or recommending attributes is out of scope.
 metadata:
   author: userflow
-  version: "1.1"
+  version: "1.2"
 ---
 
 # Userflow.js Installation
@@ -183,7 +183,7 @@ Do not use these on a default install. Add one only when the customer requests t
 
 - **`identifyAnonymous(attrs?)`** — a separate, opt-in way to identify signed-out visitors so they can see content. It is **not** a fallback for `identify()`: if a user is never identified, content simply doesn't show and they appear as "not identified" in the Userflow Debugger — that is expected. Anonymous visitors **count toward MAU and can cause overages**, so use it only with the customer's explicit consent.
 - **Identity verification** — **ask the customer first; proceed only if they want it.** Pass a `signature` (HMAC-SHA256 of the user ID, computed with the environment's Secret Key) as the third argument: `userflow.identify(userId, attrs, { signature })` (same for `group()`). The Secret Key and signing stay on the backend, never in frontend code. Recommended for production; requires backend work.
-- **`group(id, attrs?, { signature }?)` / `updateGroup(attrs)`** — associate the user with a company/account for account-level targeting (plan-gated). Call `group()` again when the active account changes.
+- **`group(id, attrs?, { signature }?)` / `updateGroup(attrs)`** — associate the user with a company/account for account-level targeting. Call `group()` again when the active account changes.
 - **`track(name, attrs?)`** — track custom events (`identify()` must be called first; page views are tracked automatically).
 - **`start(id, { once })`** — start a specific flow/checklist programmatically.
 - **`setCustomNavigate(url => router.push(url))`** — make in-flow "Go to page" actions use the app's client-side router.
