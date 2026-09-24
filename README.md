@@ -6,13 +6,11 @@ Install and verify Userflow with AI. This repository packages Userflow's Agent S
 
 It ships as a single plugin, `userflow`, that currently bundles three skills:
 
-
-| Skill                                                | What it does                                                                                                                              |
-| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `[install-with-ai](skills/install-with-ai/SKILL.md)` | Installs Userflow.js into new or existing applications.                                                                                   |
-| `[verify-with-ai](skills/verify-with-ai/SKILL.md)`   | Audits an existing Userflow.js install (init, identify, MAU risk, tokens) and reports findings.                                           |
-| `[suggest-with-ai](skills/suggest-with-ai/SKILL.md)` | Recommends attributes, stable selectors, and advanced Userflow.js functions for an existing install, and implements only what's selected. |
-
+| Skill | What it does |
+| --- | ------------------------------------------------------------ |
+| [install-with-ai](skills/install-with-ai/SKILL.md) | Installs Userflow.js into new or existing applications. |
+| [verify-with-ai](skills/verify-with-ai/SKILL.md) | Audits an existing Userflow.js install (init, identify, MAU risk, tokens) and reports findings. |
+| [suggest-with-ai](skills/suggest-with-ai/SKILL.md) | Recommends attributes, stable selectors, and advanced Userflow.js functions for an existing install, and implements only what's selected. |
 
 ## Install
 
