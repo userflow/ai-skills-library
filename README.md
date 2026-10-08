@@ -8,7 +8,7 @@ Agent Skills for Userflow. Add them to your AI coding agent once, then describe 
 - **Skills that report on your data:** read your Userflow data and return a report you can share.
 - **Skills that build things:** create content in your Userflow account after you confirm.
 
-Browse the `[skills/](skills)` folder.
+Browse the [skills/](skills) folder.
 
 ## Install
 
