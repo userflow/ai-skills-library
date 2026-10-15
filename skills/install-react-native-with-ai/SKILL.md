@@ -3,7 +3,7 @@ name: install-react-native-with-ai
 description: Installs @userflow-tech/react-native into an Expo or bare React Native app, including Expo Router and React Navigation. Default install is init(), identify() after sign-in, reset() on logout, UserflowProvider, and screen tracking. Use when someone wants to install Userflow in a React Native, Expo, Expo Router, or React Navigation app. Not for web apps or Userflow.js — those use install-with-ai.
 metadata:
   author: userflow
-  version: "1.1"
+  version: "1.3"
 ---
 
 # Userflow React Native Installation
@@ -42,7 +42,7 @@ Inspect before asking, and determine:
 
 | Read | Determine |
 |---|---|
-| `package.json` | Expo SDK and React Native versions; `expo-router` or `@react-navigation/native`; whether `@userflow-tech/react-native` or `userflow.js` is already installed; `react-native-safe-area-context`; a `test` script (Jest) |
+| `package.json` | Expo SDK and React Native versions; `expo-router` or `@react-navigation/native`; whether `@userflow-tech/react-native` or `userflow.js` is already installed; `react-native-safe-area-context`; a `test` script (Jest). The SDK requires React Native 0.76 or later (`react-native-view-shot` 5.x does not install below that). If this app is older, stop and say so. Do not upgrade React Native unless the developer explicitly agrees (rule 6). |
 | Lockfile and `.yarnrc.yml` | npm, Yarn 2+, or pnpm. Yarn 2+ ignores `.npmrc` |
 | `app.json` / `app.config.*`, `ios/`, `android/`, `babel.config.js` | Expo or bare; an existing Userflow config plugin; an existing Babel plugin |
 | Root layout or `App.tsx`, and the auth code | Where `init()`, `identify()`, `reset()`, and `UserflowProvider` belong; the user-id field |
@@ -88,15 +88,15 @@ List every native module in the app's own `package.json`. Expo SDK 53 and older,
 npx expo install @userflow-tech/react-native @react-native-async-storage/async-storage react-native-view-shot@^5.0.0 react-native-webview
 
 # Bare React Native (same rule)
-npm install @userflow-tech/react-native @react-native-async-storage/async-storage react-native-device-info react-native-view-shot react-native-webview
+npm install @userflow-tech/react-native @react-native-async-storage/async-storage react-native-device-info react-native-view-shot@^5.0.0 react-native-webview
 cd ios && pod install
 ```
 
-Use the app's package manager. On Expo SDK 54, unpinned `npx expo install react-native-view-shot` resolves 4.0.3, which does not satisfy `>=5.0.0`. Keep the `^5.0.0` pin. On SDK 54, when `expo doctor` then reports a mismatch, add `"react-native-view-shot"` to `expo.install.exclude` in `package.json`.
+Use the app's package manager. On Expo SDK 54, unpinned `npx expo install react-native-view-shot` resolves 4.0.3, which does not satisfy `^5.0.0`. If `package.json` already has view-shot below 5, keep `react-native-view-shot@^5.0.0` in the same install command as `@userflow-tech/react-native`. Installing the SDK alone fails with `ERESOLVE`. The two lines that matter are `Found: react-native-view-shot@4.0.3` and `peer react-native-view-shot@"^5.0.0" from @userflow-tech/react-native`. Rerun the combined command above. Do not retry with `--force` or `--legacy-peer-deps`; that installs the SDK and leaves 4.0.3 in place. On SDK 54, when `expo doctor` then reports a mismatch, add `"react-native-view-shot"` to `expo.install.exclude` in `package.json`.
 
 `react-native-device-info` is for bare React Native. Expo reads the app version from `expo-constants`.
 
-Add these only when the app needs them: `react-native-safe-area-context` (install it if no `SafeAreaProvider` exists), `@react-native-community/netinfo`, `expo-secure-store`.
+Install `react-native-safe-area-context` unless the app already depends on it. Without it, banners, flow cards, and Builder bars draw under the status bar and home indicator. Expo Router and React Navigation apps usually have it already; a `SafeAreaProvider` in the tree is not a substitute for the package. Also add `@react-native-community/netinfo` and `expo-secure-store` when the app needs instant reconnect or pairing that survives a restart.
 
 ## Step 4 — Register the deep-link scheme
 
