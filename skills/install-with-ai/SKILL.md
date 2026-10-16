@@ -1,9 +1,9 @@
 ---
 name: install-with-ai
-description: Installs Userflow.js into new or existing applications. Default install is init() + identify() (after sign-in/sign-up) + reset() only. Use when someone wants to install Userflow, add Userflow.js, or wire Userflow into a codebase. Installation only — verifying an existing install or recommending attributes is out of scope.
+description: Installs Userflow.js into new or existing web applications. Default install is init() + identify() (after sign-in/sign-up) + reset() only. Use when someone wants to install Userflow, add Userflow.js, or wire Userflow into a web codebase. Not for React Native or Expo — those use install-react-native-with-ai. Installation only — verifying an existing install or recommending attributes is out of scope.
 metadata:
   author: userflow
-  version: "1.2"
+  version: "1.3"
 ---
 
 # Userflow.js Installation
@@ -29,6 +29,8 @@ Install only, for a new or existing codebase. The default install is three calls
 ---
 
 ## Step 1 — Analyze the Codebase
+
+If `package.json` lists `react-native` or `expo`, stop. This is a React Native app: use `install-react-native-with-ai`, and never install `userflow.js` in it.
 
 **If you have repository access,** inspect the project before asking anything, and determine:
 

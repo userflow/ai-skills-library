@@ -3,7 +3,7 @@ name: suggest-with-ai
 description: Analyzes a codebase with a working Userflow.js installation and recommends how to get more out of it — which user and company attributes to send, how to make flow targeting reliable with stable selectors, and which Userflow.js advanced functions fit the app. Produces a prioritized, evidence-based report and implements only the suggestions the customer selects. Use when someone wants recommendations for Userflow attributes, better flow targeting, selector stability, or asks what else they should send to Userflow. Suggestions only — installing is the install-with-ai skill, checking correctness is the verify-with-ai skill.
 metadata:
   author: userflow
-  version: "1.0"
+  version: "1.1"
 ---
 
 # Userflow.js Suggestions
@@ -14,7 +14,7 @@ This skill reads a codebase that already has Userflow.js installed and recommend
 
 ## Scope
 
-Suggestions for an existing, working installation. If Userflow.js isn't installed, hand over to the `install-with-ai` skill. If the install looks broken — duplicate `init()`, identification on public pages — recommend `verify-with-ai` first rather than building suggestions on a defective base.
+Web only (Userflow.js). A React Native or Expo app is out of scope. Suggestions for an existing, working installation. If Userflow.js isn't installed, hand over to the `install-with-ai` skill. If the install looks broken — duplicate `init()`, identification on public pages — recommend `verify-with-ai` first rather than building suggestions on a defective base.
 
 ## Core Rules (non-negotiable - apply throughout)
 
