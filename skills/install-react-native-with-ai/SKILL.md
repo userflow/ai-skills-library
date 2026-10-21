@@ -1,6 +1,6 @@
 ---
 name: install-react-native-with-ai
-description: Installs @userflow-tech/react-native into an Expo or bare React Native app, including Expo Router and React Navigation. Default install is init(), identify() after sign-in, reset() on logout, UserflowProvider, and screen tracking. Use when someone wants to install Userflow in a React Native, Expo, Expo Router, or React Navigation app. Not for web apps or Userflow.js — those use install-with-ai.
+description: Installs @userflow-tech/react-native into an Expo or bare React Native app, including Expo Router and React Navigation. Default install is init(), identify() after sign-in, reset() on logout, UserflowProvider, screen tracking, and the Babel plugin that lets authors select elements on the device. Use when someone wants to install Userflow in a React Native, Expo, Expo Router, or React Navigation app. Not for web apps or Userflow.js — those use install-with-ai.
 metadata:
   author: userflow
   version: "1.1"
@@ -10,18 +10,18 @@ metadata:
 
 This skill installs `@userflow-tech/react-native` correctly and minimally. The install changes which users get identified, which directly affects the customer's Monthly Active User (MAU) count and bill — so follow the core rules below exactly. Userflow counts MAU per user ID, so one user identified on web and mobile, or on several devices, counts once. When the customer already identifies that user from a web Userflow.js install, pass the same user ID to `identify()` here.
 
-**AGENTS.md convention:** Append a "Userflow installation" section to the project's AGENTS.md (or CLAUDE.md, if that is the file the project keeps agent notes in; update both when both exist) recording: package manager, the file where `init()` lives, the file(s) where `identify()` and `reset()` live, where `UserflowProvider` and screen tracking are mounted, the client-token source, the `scheme_id`, and the user-ID field used. Update or append — never overwrite the file or unrelated sections.
+**AGENTS.md convention:** Append a "Userflow installation" section to the project's AGENTS.md (or CLAUDE.md, if that is the file the project keeps agent notes in; update both when both exist) recording: package manager, the file where `init()` lives, the file(s) where `identify()` and `reset()` live, where `UserflowProvider` and screen tracking are mounted, the Babel config that loads the plugin, the client-token source, the `scheme_id`, and the user-ID field used. Update or append — never overwrite the file or unrelated sections.
 
 ## Scope
 
-Install only, for a new or existing React Native codebase. The default install is `init()` + `identify()` + `reset()` + `UserflowProvider` + screen tracking. Verifying an existing install and recommending attributes are out of scope.
+Install only, for a new or existing React Native codebase. The default install is `init()` + `identify()` + `reset()` + `UserflowProvider` + screen tracking + the Babel plugin. Verifying an existing install and recommending attributes are out of scope.
 
 If `package.json` has neither `react-native` nor `expo`, this is not a React Native app. Stop and use `install-with-ai`. Never install `userflow.js` here, and never install `@userflow-tech/react-native` into a web app.
 
 ## Core Rules (non-negotiable — apply throughout)
 
 1. **Authenticated users only.** Call `identify()` only after sign-in, and again on launches where a user is already signed in. Call `reset()` on logout. Do not call `identifyAnonymous()` on a default install — anonymous users count toward MAU and can cause overages.
-2. **Keep it simple.** The default install is the five pieces in Scope. Babel plugin, `identifyAnonymous()`, `group()`, `track()`, and identity verification are Advanced — add one only when the customer asks, or, for identity verification, when the environment requires it (Step 1).
+2. **Keep it simple.** The default install is the six pieces in Scope. `identifyAnonymous()`, `group()`, `track()`, and identity verification are Advanced — add one only when the customer asks, or, for identity verification, when the environment requires it (Step 1).
 3. **Native modules need a native rebuild.** A Metro reload does not link native modules or URL schemes. Expo Go cannot load this SDK. Use a development build (`npx expo run:ios` / `npx expo run:android`) or a prebuilt bare app.
 4. **Tokens.**
    - The client token is `ct_...`, one per environment, from the dashboard (Settings → Environments). Wire it through the app's existing env config.
@@ -45,12 +45,12 @@ Inspect before asking, and determine:
 | `AGENTS.md`, `CLAUDE.md`, `README` | Project rules, read before writing code. Rules about where SDK code lives (for example "only `src/adoption/` imports the SDK") and gates such as "ask before installing" override this skill's default placement and steps. |
 | `package.json` | Expo SDK and React Native versions; `expo-router` or `@react-navigation/native`; whether `@userflow-tech/react-native` or `userflow.js` is already installed; `react-native-safe-area-context`; a `test` script (Jest). If `userflow.js` is in this app, follow rule 8 and "If installation goes wrong, do not switch to the web SDK". The SDK requires React Native 0.76 or later (`react-native-view-shot` 5.x does not install below that). If this app is older, stop and say so. Do not upgrade React Native unless the developer explicitly agrees (rule 6). The SDK is tested up to Expo SDK 57. Expo SDK 58 and later bundle `react-native-webview` 14 and `react-native-view-shot` 6, which are outside the SDK's peer ranges. On Expo SDK 58 or later, tell the developer that version is not supported yet and stop. Do not force older WebView or view-shot versions onto it. |
 | Lockfile and `.yarnrc.yml` | npm, Yarn 2+, or pnpm |
-| `app.json` / `app.config.*`, `ios/`, `android/`, `babel.config.js` | Expo or bare; an existing Userflow config plugin; an existing Babel plugin |
+| `app.json` / `app.config.*`, `ios/`, `android/`, `babel.config.js` | Expo or bare; an existing Userflow config plugin; whether `babel.config.js` exists, its plugins, and `api.cache(true)` |
 | Root layout or `App.tsx`, and the auth code | Where `init()`, `identify()`, `reset()`, and `UserflowProvider` belong; the user-id field |
 | Analytics or adoption wrapper (`src/analytics/`, `src/adoption/`, a tracking facade) | Whether the app routes identity through its own layer. If it does, implement the SDK inside that wrapper instead of adding direct calls to the root layout, and say so in the confirmation. |
 | Search the source for `userflow`, `Userflow`, and `identifyAnonymous(` | Existing Userflow code (rule 5). If the app already calls `identifyAnonymous()`, even through a no-op wrapper, ask whether to keep it before it reaches the real SDK: anonymous users count toward MAU (rule 1). |
 
-Confirm once, naming the real stack — e.g. *"Expo SDK 57 with Expo Router; the current user comes from `useAuth()` in `src/auth/AuthProvider.tsx`; the id is `user.id`, the same id the web app already sends to Userflow. I'll init at startup, identify whenever a user is signed in, and reset on sign-out. Correct?"* — then continue. Ask whether that id matches the web install when the customer has one. Also ask whether the environment has identity verification enabled. If it does, `identify()` fails without a signature from the customer's backend, so the Advanced identity verification item is required.
+Confirm once, naming the real stack — e.g. *"Expo SDK 57 with Expo Router; the current user comes from `useAuth()` in `src/auth/AuthProvider.tsx`; the id is `user.id`, the same id the web app already sends to Userflow. I'll init at startup, identify whenever a user is signed in, reset on sign-out, and add the Babel plugin so you can select elements on the device. Correct?"* — then continue. Ask whether that id matches the web install when the customer has one. Also ask whether the environment has identity verification enabled. If it does, `identify()` fails without a signature from the customer's backend, so the Advanced identity verification item is required.
 
 No repository access: do not invent paths. Ask for the stack, auth entry points, and user-id field, or switch to the Developer Handoff Spec and stop.
 
@@ -87,7 +87,7 @@ Expo, in `app.json` or `app.config.js`:
 
 `npx expo install` already added a bare `"@userflow-tech/react-native"` entry to `plugins`. Once you have the `scheme_id`, replace that entry with the one above. Never leave both, and never leave the bare one once a `scheme_id` is known.
 
-No `scheme_id` yet: keep the bare entry. The plugin then changes nothing, and prebuild prints `No schemeId was passed…`. Tell the developer that pairing and preview links won't open the app until it is set, and record the `scheme_id` as pending in AGENTS.md (Step 9).
+No `scheme_id` yet: keep the bare entry. The plugin then changes nothing, and prebuild prints `No schemeId was passed…`. Tell the developer that pairing and preview links won't open the app until it is set, and record the `scheme_id` as pending in AGENTS.md (Step 10).
 
 Bare React Native: follow `docs/deep-linking.md` inside the installed package ([public copy](https://unpkg.com/@userflow-tech/react-native/docs/deep-linking.md)) for the `Info.plist` and `AndroidManifest.xml` entries.
 
@@ -148,26 +148,48 @@ React Navigation does not. Wrap the app yourself:
 - **React Navigation:** wrap the navigator with `WithUserflowReactNavigation`.
 - **Anything else:** call `Userflow.updateScreen(name)` (or `useUserflowScreen`) when the screen changes.
 
-## Step 7 — Jest
+## Step 7 — Babel plugin (on-device element selection)
+
+Always add `@userflow-tech/react-native/babel-plugin`. It stamps `View`, `Text`, `Pressable`, the Touchables, `TextInput`, and `Image` at build time, so authors can select elements on the paired device in the Builder and target them without a `testID`. Without it, on-device selection only finds elements that already have an id, a label, or a press handler, and codeless selectors lose their scored match when a flow plays. Keep the default full mode; `stampOnly: true` leaves the picker's registry empty.
+
+1. No `babel.config.js` (common on Expo): create it with `npx expo customize babel.config.js`. Bare React Native already has one.
+2. Add the plugin to `plugins`, keeping the app's presets and plugins. If `plugins` lists `react-native-reanimated/plugin` or `react-native-worklets/plugin`, keep that one last.
+3. If the app has Jest, skip the plugin under test: Jest reads the same config, and the stamps rewrite snapshots. Remove `api.cache(true)`, because calling it before `api.env` throws `Caching has already been configured`, and `api.env` already caches per environment:
+
+   ```js
+   module.exports = function (api) {
+     const isTest = api.env('test');
+     return {
+       presets: ['babel-preset-expo'], // keep the app's own presets
+       plugins: isTest ? [] : ['@userflow-tech/react-native/babel-plugin'],
+     };
+   };
+   ```
+
+Tell the developer that stamped ids come from the file path, sibling order, and static labels, so moving a file or reordering elements can break a codeless selector. For elements a key flow depends on, a `testID` is still the most durable target.
+
+## Step 8 — Jest
 
 If the app has Jest, mock the SDK in the Jest setup file so tests do not load native modules. Copy the mock from the Jest section of the installed package README. Include the methods the app calls, and also mock the router entry the app imports (`@userflow-tech/react-native/expo-router` or `/navigation`), with every export the app uses from it. In a TypeScript setup file, type the provider's `children` as `ReactNode` so strict mode passes.
 
-## Step 8 — Verify
+## Step 9 — Verify
 
 You run:
 
 - The app's typecheck.
 - The app's tests, if it has them.
 - `npx expo-doctor` (Expo).
+- The Babel plugin stamps: `node -e "console.log(/uf_/.test(require('@babel/core').transformFileSync(process.argv[1]).code))" <a component file that renders a View or Text>` prints `true`.
 - A bundle: `npx expo export --platform ios`, or `react-native bundle` for bare React Native. Delete the output afterwards (`expo export` writes `dist/`).
 
 If the typecheck reports errors from inside `node_modules/@userflow-tech/react-native/src` (a missing `.png` module or `@react-navigation/native`), the installed SDK version is too old for Expo's TypeScript setup. Tell the developer and suggest a newer version. Do not add stub declarations or extra dependencies to the app without their OK.
 
 Then hand the customer the steps you cannot do:
 
-1. Rebuild and launch the native app. A Metro reload is not enough. With Expo, if `ios/` or `android/` already exists, `npx expo run:*` does not re-run prebuild, so the new scheme and native modules never reach the native project. Run `npx expo prebuild` first (never `--clean` without a yes). If those folders are committed and hand-edited, treat the app as bare and check the scheme in `Info.plist` and `AndroidManifest.xml`.
+1. Rebuild and launch the native app. A Metro reload is not enough. With Expo, if `ios/` or `android/` already exists, `npx expo run:*` does not re-run prebuild, so the new scheme and native modules never reach the native project. Run `npx expo prebuild` first (never `--clean` without a yes). If those folders are committed and hand-edited, treat the app as bare and check the scheme in `Info.plist` and `AndroidManifest.xml`. Start Metro with a cleared cache once (`npx expo start -c`, or `npx react-native start --reset-cache`) so every file is stamped.
 2. Confirm the dev console has no `[Userflow]` setup warning. A complete install stays quiet.
 3. In the Builder, open Preview → "Pair a device" and scan the QR code. The app shows a "Preview mode" bar. Then press Preview.
+4. Select a tooltip target on the device, choosing an element without a `testID`. If it can't be selected, check that the Babel plugin is in the config and that Metro was started with a cleared cache.
 
 Search device logs for `[Userflow]` if any of those fail, and match the line to `docs/troubleshooting.md` ([public copy](https://unpkg.com/@userflow-tech/react-native/docs/troubleshooting.md)).
 
@@ -181,7 +203,7 @@ Search device logs for `[Userflow]` if any of those fail, and match the line to 
 - `userflow.js` already present in this app's `package.json` or imports is a leftover from a wrong-SDK attempt. Report it and remove it only with a yes. In a monorepo, leave a separate web app's `userflow.js` alone.
 - Expo apps that also build for web: this SDK covers iOS and Android. Userflow in the web build of an Expo app isn't supported yet; tell the customer if they ask, and don't add Userflow.js to it.
 
-## Step 9 — Document
+## Step 10 — Document
 
 Add or update the "Userflow installation" section in `AGENTS.md` (or `CLAUDE.md`), as described at the top. Never overwrite the rest of the file. If existing notes say something the install made false (for example "SDK not installed yet"), list those lines and propose edits; don't only append.
 
@@ -189,23 +211,9 @@ Add or update the "Userflow installation" section in `AGENTS.md` (or `CLAUDE.md`
 
 ## Developer Handoff Spec
 
-Without repository access, do not write code. Generate `USERFLOW_RN_INSTALL_SPEC.md` containing: how to detect Expo vs bare and the router; the install commands; where `scheme_id` and `clientToken` come from; the `init` / `identify` / `reset` / provider / screen-tracking code with the customer's real user-id field named; the Jest mock note; the core rules; and the Step 8 checklist. The document must stand on its own.
+Without repository access, do not write code. Generate `USERFLOW_RN_INSTALL_SPEC.md` containing: how to detect Expo vs bare and the router; the install commands; where `scheme_id` and `clientToken` come from; the `init` / `identify` / `reset` / provider / screen-tracking code with the customer's real user-id field named; the Babel plugin config; the Jest mock note; the core rules; and the Step 9 checklist. The document must stand on its own.
 
 ## Advanced — only when the customer asks
-
-- **Babel plugin** (`@userflow-tech/react-native/babel-plugin`). It stamps `nativeID` at build time so elements can be targeted without a `testID`. Jest runs `babel.config.js` too, so the plugin rewrites snapshots unless tests skip it. When the app has snapshot tests, gate it and remove `api.cache(true)` (`api.env` caches per environment; calling `api.cache(true)` first throws `Caching has already been configured`):
-
-  ```js
-  module.exports = function (api) {
-    const isTest = api.env('test');
-    return {
-      presets: ['babel-preset-expo'],
-      plugins: isTest ? [] : ['@userflow-tech/react-native/babel-plugin'],
-    };
-  };
-  ```
-
-  Then clear the Metro cache (`npx expo start -c`). Generated ids change when labels, sibling order, or file paths change, so codeless selectors have to be re-authored. Prefer `testID` unless the customer asked for the plugin.
 
 - **`identifyAnonymous()`.** Opt-in identification of signed-out users. They count toward MAU. Not a fallback for `identify()`. Requires the customer's explicit consent, and requires AsyncStorage to be linked.
 - **Identity verification.** Required when the environment has it enabled (Step 1); otherwise ask first. The signature is an HMAC-SHA256 of the user id, computed on the customer's backend with the identity verification secret key (`esk_...`), and passed as `identify(id, attrs, { signature })`. Follow the installed `docs/identity-verification.md` ([public copy](https://unpkg.com/@userflow-tech/react-native/docs/identity-verification.md)). The secret never ships in the app.
