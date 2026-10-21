@@ -42,7 +42,7 @@ Inspect before asking, and determine:
 
 | Read | Determine |
 |---|---|
-| `package.json` | Expo SDK and React Native versions; `expo-router` or `@react-navigation/native`; whether `@userflow-tech/react-native` or `userflow.js` is already installed; `react-native-safe-area-context`; a `test` script (Jest). If `userflow.js` is in this app, follow rule 8 and "If installation goes wrong, do not switch to the web SDK". The SDK requires React Native 0.76 or later (`react-native-view-shot` 5.x does not install below that). If this app is older, stop and say so. Do not upgrade React Native unless the developer explicitly agrees (rule 6). |
+| `package.json` | Expo SDK and React Native versions; `expo-router` or `@react-navigation/native`; whether `@userflow-tech/react-native` or `userflow.js` is already installed; `react-native-safe-area-context`; a `test` script (Jest). If `userflow.js` is in this app, follow rule 8 and "If installation goes wrong, do not switch to the web SDK". The SDK requires React Native 0.76 or later (`react-native-view-shot` 5.x does not install below that). If this app is older, stop and say so. Do not upgrade React Native unless the developer explicitly agrees (rule 6). The SDK is tested up to Expo SDK 57. Expo SDK 58 and later bundle `react-native-webview` 14 and `react-native-view-shot` 6, which are outside the SDK's peer ranges. On Expo SDK 58 or later, tell the developer that version is not supported yet and stop. Do not force older WebView or view-shot versions onto it. |
 | Lockfile and `.yarnrc.yml` | npm, Yarn 2+, or pnpm |
 | `app.json` / `app.config.*`, `ios/`, `android/`, `babel.config.js` | Expo or bare; an existing Userflow config plugin; an existing Babel plugin |
 | Root layout or `App.tsx`, and the auth code | Where `init()`, `identify()`, `reset()`, and `UserflowProvider` belong; the user-id field |
@@ -60,15 +60,17 @@ List every native module in the app's own `package.json`. Expo SDK 53 and older,
 npx expo install @userflow-tech/react-native @react-native-async-storage/async-storage react-native-view-shot@^5.0.0 react-native-webview
 
 # Bare React Native (same rule)
-npm install @userflow-tech/react-native @react-native-async-storage/async-storage react-native-device-info react-native-view-shot@^5.0.0 react-native-webview
+npm install @userflow-tech/react-native '@react-native-async-storage/async-storage@^2' 'react-native-device-info@<16' 'react-native-view-shot@^5.0.0' 'react-native-webview@>=13.8.0 <14'
 cd ios && pod install
 ```
 
-Use the app's package manager. On Expo SDK 54, unpinned `npx expo install react-native-view-shot` resolves 4.0.3, which does not satisfy `^5.0.0`. If `package.json` already has view-shot below 5, keep `react-native-view-shot@^5.0.0` in the same install command as `@userflow-tech/react-native`. Installing the SDK alone fails with `ERESOLVE`. The two lines that matter are `Found: react-native-view-shot@4.0.3` and `peer react-native-view-shot@"^5.0.0" from @userflow-tech/react-native`. Rerun the combined command above. Do not retry with `--force` or `--legacy-peer-deps`; that installs the SDK and leaves 4.0.3 in place. On SDK 54, when `expo doctor` then reports a mismatch, add `"react-native-view-shot"` to `expo.install.exclude` in `package.json`.
+Keep the version ranges in the bare command. Unpinned, npm picks the latest majors: `react-native-webview` 14 is outside the SDK's range, and npm only warns `ERESOLVE overriding peer dependency` and installs it anyway. AsyncStorage 3 sits next to the SDK's own 2.x copy, which leaves two copies of one native module. Treat an `overriding peer dependency` warning as a failed install. `npx expo install` picks Expo's bundled versions, which fit the SDK's ranges on Expo SDK 53–57.
+
+Use the app's package manager. On Expo SDK 55 and older, unpinned `npx expo install react-native-view-shot` resolves 4.0.3, which does not satisfy `^5.0.0`. If `package.json` already has view-shot below 5, keep `react-native-view-shot@^5.0.0` in the same install command as `@userflow-tech/react-native`. Installing the SDK alone fails with `ERESOLVE`. The two lines that matter are `Found: react-native-view-shot@4.0.3` and `peer react-native-view-shot@"^5.0.0" from @userflow-tech/react-native`. Rerun the combined command above. Do not retry with `--force` or `--legacy-peer-deps`; that installs the SDK and leaves 4.0.3 in place. On Expo SDK 55 and older, when `expo doctor` then reports a mismatch, add `"react-native-view-shot"` to `expo.install.exclude` in `package.json`.
 
 `react-native-device-info` is for bare React Native. Expo reads the app version from `expo-constants`.
 
-Install `react-native-safe-area-context` unless the app already depends on it. Without it, banners, flow cards, and Builder bars draw under the status bar and home indicator. Expo Router and React Navigation apps usually have it already; a `SafeAreaProvider` in the tree is not a substitute for the package. Also add `@react-native-community/netinfo` and `expo-secure-store` when the app needs instant reconnect or pairing that survives a restart.
+Install `react-native-safe-area-context` unless the app already depends on it. Without it, banners, flow cards, and Builder bars draw under the status bar and home indicator. Expo Router and React Navigation apps usually have it already; a `SafeAreaProvider` in the tree is not a substitute for the package. Also add `@react-native-community/netinfo` and `expo-secure-store` when the app needs instant reconnect or pairing that survives a restart. In bare React Native, pin these too: `'react-native-safe-area-context@<6'` and `'@react-native-community/netinfo@<13'`.
 
 ## Step 3 — Register the deep-link scheme
 
