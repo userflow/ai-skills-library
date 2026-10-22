@@ -107,7 +107,8 @@ await Userflow.init({ clientToken }); // once per process; safe to call again wi
 await Userflow.identify(user.id, { name: user.name, email: user.email });
 ```
 
-- `init` at startup, before `identify`. A second `init` with different options is ignored until the app restarts. When startup code and the auth code both need it, put the `init` call in one small module that both await.- `identify` wherever the app learns who the current user is: an auth-state listener or the current-user value from the auth context. Hooking only the sign-in function misses sign-up, demo or magic-link sign-in, and restored sessions. Await `init` first.
+- `init` at startup, before `identify`. A second `init` with different options is ignored until the app restarts. When startup code and the auth code both need it, put the `init` call in one small module that both await.
+- `identify` wherever the app learns who the current user is: an auth-state listener or the current-user value from the auth context. Hooking only the sign-in function misses sign-up, demo or magic-link sign-in, and restored sessions. Await `init` first.
 - `reset` when a signed-in user signs out.
 - No sign-in at all: there is no user to identify, and flows and Builder previews only reach an identified user (a preview link waits for `identify`). Tell the developer. The only option is `identifyAnonymous()`, which counts every device that opens the app toward MAU (rule 1). Add it only with an explicit yes. Add no `reset()`, since nothing signs out. If they decline, finish the rest of the install and tell them that flows and the Step 9 preview check won't work until the app identifies a user.
 - Read `clientToken` from the app's env config. One token per environment. A value that does not start with `ct_` is a placeholder: skip `init` for that environment and tell the developer. Never replace it with a guess.
