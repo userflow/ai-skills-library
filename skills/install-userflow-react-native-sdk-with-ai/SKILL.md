@@ -10,7 +10,7 @@ metadata:
 
 This skill installs `@userflow-tech/react-native` correctly and minimally. The install changes which users get identified, which directly affects the customer's Monthly Active User (MAU) count and bill — so follow the core rules below exactly. Userflow counts MAU per user ID, so one user identified on web and mobile, or on several devices, counts once. When the customer already identifies that user from a web Userflow.js install, pass the same user ID to `identify()` here.
 
-**AGENTS.md convention:** Append a "Userflow installation" section to the project's AGENTS.md (or CLAUDE.md, if that is the file the project keeps agent notes in; update both when both exist) recording: package manager, the file where `init()` lives, the file(s) where `identify()` and `reset()` live, where `UserflowProvider` and screen tracking are mounted, the Babel config that loads the plugin, the client-token source, the `scheme_id`, and the user-ID field used. Update or append — never overwrite the file or unrelated sections.
+**AGENTS.md convention:** Append a "Userflow installation" section to the project's AGENTS.md (or CLAUDE.md, if that is the file the project keeps agent notes in; update both when both exist) recording: package manager, the file where `init()` lives, the file(s) where `identify()` and `reset()` live (or that the app has no sign-in), where `UserflowProvider` and screen tracking are mounted, the Babel config that loads the plugin, the client-token source, the `scheme_id`, and the user-ID field used. Update or append — never overwrite the file or unrelated sections.
 
 ## Scope
 
@@ -46,7 +46,7 @@ Inspect before asking, and determine:
 | `package.json` | Expo SDK and React Native versions; `expo-router` or `@react-navigation/native`; whether `@userflow-tech/react-native` or `userflow.js` is already installed; `react-native-safe-area-context`; a `test` script (Jest). If `userflow.js` is in this app, follow rule 8 and "If installation goes wrong, do not switch to the web SDK". The SDK requires React Native 0.76 or later (`react-native-view-shot` 5.x does not install below that). If this app is older, stop and say so. Do not upgrade React Native unless the developer explicitly agrees (rule 6). The SDK is tested up to Expo SDK 57. Expo SDK 58 and later bundle `react-native-webview` 14 and `react-native-view-shot` 6, which are outside the SDK's peer ranges. On Expo SDK 58 or later, tell the developer that version is not supported yet and stop. Do not force older WebView or view-shot versions onto it. |
 | Lockfile and `.yarnrc.yml` | npm, Yarn 2+, or pnpm |
 | `app.json` / `app.config.*`, `ios/`, `android/`, `babel.config.js` | Expo or bare; an existing Userflow config plugin; whether `babel.config.js` exists, its plugins, and `api.cache(true)` |
-| Root layout or `App.tsx`, and the auth code | Where `init()`, `identify()`, `reset()`, and `UserflowProvider` belong; the user-id field |
+| Root layout or `App.tsx`, and the auth code | Where `init()`, `identify()`, `reset()`, and `UserflowProvider` belong; the user-id field; or that the app has no sign-in (Step 4) |
 | An existing analytics, adoption, or tracking wrapper | Whether the app routes identity through its own layer. If it does, implement the SDK inside that wrapper instead of adding direct calls to the root layout, and say so in the confirmation. |
 | Search the source for `userflow`, `Userflow`, and `identifyAnonymous(` | Existing Userflow code (rule 5). If the app already calls `identifyAnonymous()`, even through a no-op wrapper, ask whether to keep it before it reaches the real SDK: anonymous users count toward MAU (rule 1). |
 
@@ -59,7 +59,10 @@ No repository access: do not invent paths. Ask for the stack, auth entry points,
 List every native module in the app's own `package.json`. Expo SDK 53 and older, and bare React Native, do not autolink packages that are only transitive dependencies. Leave out a package the app already lists at a version that satisfies the SDK, so its existing pin is kept.
 
 ```bash
-# Expo (drop any package the app already lists at a satisfying version)
+# Expo SDK 56–57 (drop any package the app already lists at a satisfying version)
+npx expo install @userflow-tech/react-native @react-native-async-storage/async-storage react-native-view-shot react-native-webview
+
+# Expo SDK 55 and older (same rule; pin view-shot, see below)
 npx expo install @userflow-tech/react-native @react-native-async-storage/async-storage react-native-view-shot@^5.0.0 react-native-webview
 
 # Bare React Native (same rule)
@@ -67,13 +70,15 @@ npm install @userflow-tech/react-native '@react-native-async-storage/async-stora
 cd ios && pod install
 ```
 
-Keep the version ranges in the bare command. Unpinned, npm picks the latest majors: `react-native-webview` 14 is outside the SDK's range, and npm only warns `ERESOLVE overriding peer dependency` and installs it anyway. AsyncStorage 3 sits next to the SDK's own 2.x copy, which leaves two copies of one native module. Treat an `overriding peer dependency` warning as a failed install. `npx expo install` picks Expo's bundled versions, which fit the SDK's ranges on Expo SDK 53–57.
+Keep the version ranges in the bare command. Unpinned, npm picks the latest majors: `react-native-webview` 14 is outside the SDK's range, and npm only warns `ERESOLVE overriding peer dependency` and installs it anyway. AsyncStorage 3 sits next to the SDK's own 2.x copy, which leaves two copies of one native module. Treat an `overriding peer dependency` warning as a failed install. `npx expo install` picks Expo's bundled versions, which fit the SDK's ranges on Expo SDK 53–57, except view-shot on Expo SDK 55 and older.
 
-Use the app's package manager. On Expo SDK 55 and older, unpinned `npx expo install react-native-view-shot` resolves 4.0.3, which does not satisfy `^5.0.0`. If `package.json` already has view-shot below 5, keep `react-native-view-shot@^5.0.0` in the same install command as `@userflow-tech/react-native`. Installing the SDK alone fails with `ERESOLVE`. The two lines that matter are `Found: react-native-view-shot@4.0.3` and `peer react-native-view-shot@"^5.0.0" from @userflow-tech/react-native`. Rerun the combined command above. Do not retry with `--force` or `--legacy-peer-deps`; that installs the SDK and leaves 4.0.3 in place. On Expo SDK 55 and older, in the same step as pinning `^5.0.0`, add `"react-native-view-shot"` to `expo.install.exclude` in `package.json` (`"expo": { "install": { "exclude": ["react-native-view-shot"] } }`). Without it, `npx expo-doctor` fails ("expected 4.0.3, found 5.1.1") and `npx expo install --fix` downgrades view-shot.
+Use the app's package manager. On Expo SDK 56 and 57, leave view-shot unpinned. Expo bundles 5.1.0, which satisfies `^5.0.0`. A `^5.0.0` pin resolves the newest 5.x on a fresh install, and `npx expo-doctor` then fails ("expected 5.1.0, found 5.1.1"). If that happened, rerun `npx expo install react-native-view-shot` instead of adding an exclude.
+
+On Expo SDK 55 and older, unpinned `npx expo install react-native-view-shot` resolves 4.0.3, which does not satisfy `^5.0.0`. If `package.json` already has view-shot below 5, keep `react-native-view-shot@^5.0.0` in the same install command as `@userflow-tech/react-native`. Installing the SDK alone fails with `ERESOLVE`. The two lines that matter are `Found: react-native-view-shot@4.0.3` and `peer react-native-view-shot@"^5.0.0" from @userflow-tech/react-native`. Rerun the Expo SDK 55 and older command above. Do not retry with `--force` or `--legacy-peer-deps`; that installs the SDK and leaves 4.0.3 in place. On Expo SDK 55 and older, in the same step as pinning `^5.0.0`, add `"react-native-view-shot"` to `expo.install.exclude` in `package.json` (`"expo": { "install": { "exclude": ["react-native-view-shot"] } }`). Without it, `npx expo-doctor` fails ("expected 4.0.3, found 5.1.1") and `npx expo install --fix` downgrades view-shot.
 
 `react-native-device-info` is for bare React Native. Expo reads the app version from `expo-constants`.
 
-Install `react-native-safe-area-context` unless the app already depends on it. Without it, banners, flow cards, and Builder bars draw under the status bar and home indicator. Expo Router and React Navigation apps usually have it already; a `SafeAreaProvider` in the tree is not a substitute for the package. Ask the developer whether to add the optional peers: `@react-native-community/netinfo` reconnects instantly when the network returns, and `expo-secure-store` keeps Builder pairing across an app restart (without it, they re-scan the QR code after every restart). In bare React Native, pin these too: `'react-native-safe-area-context@<6'` and `'@react-native-community/netinfo@<13'`.
+Install `react-native-safe-area-context` unless the app already depends on it. Without it, banners, flow cards, and Builder bars draw under the status bar and home indicator. Expo Router and React Navigation apps usually have it already; a `SafeAreaProvider` in the tree is not a substitute for the package. Ask the developer whether to add the optional peers: `@react-native-community/netinfo` reconnects instantly when the network returns, and `expo-secure-store` keeps Builder pairing across an app restart (without it, they re-scan the QR code after every restart). On Expo, recommend both: `npx expo install @react-native-community/netinfo expo-secure-store` picks versions that match the SDK, and the app needs a native rebuild anyway. In bare React Native, pin these too: `'react-native-safe-area-context@<6'` and `'@react-native-community/netinfo@<13'`. Recommend NetInfo there, and `expo-secure-store` only when the app already has Expo modules (it needs them).
 
 ## Step 3 — Register the deep-link scheme
 
@@ -103,7 +108,9 @@ await Userflow.identify(user.id, { name: user.name, email: user.email });
 - `init` at startup, before `identify`. A second `init` with different options is ignored until the app restarts. When startup code and the auth code both need it, put the `init` call in one small module that both await.
 - `identify` wherever the app learns who the current user is: an auth-state listener or the current-user value from the auth context. Hooking only the sign-in function misses sign-up, demo or magic-link sign-in, and restored sessions. Await `init` first.
 - `reset` when a signed-in user signs out.
+- No sign-in at all: there is no user to identify, and flows and Builder previews only reach an identified user (a preview link waits for `identify`). Tell the developer. The only option is `identifyAnonymous()`, which counts every device that opens the app toward MAU (rule 1). Add it only with an explicit yes. Add no `reset()`, since nothing signs out.
 - Read `clientToken` from the app's env config. One token per environment. A value that does not start with `ct_` is a placeholder: skip `init` for that environment and tell the developer. Never replace it with a guess.
+- No env config yet: on Expo, add `EXPO_PUBLIC_USERFLOW_CLIENT_TOKEN=<the ct_ token>` to `.env` at the project root. Edit the file if it exists; never overwrite it (for example with `echo … > .env`). Read it as `process.env.EXPO_PUBLIC_USERFLOW_CLIENT_TOKEN`; Expo inlines only that dot-notation form. Fully reload the app after changing `.env`. If `.env` is gitignored, EAS Build doesn't receive it, so tell the developer to set the same variable in EAS too. The `ct_` token ships in the app and isn't a secret. Bare React Native has no built-in env loader: ask how the app handles config before adding a package for it.
 - Log `init` and `identify` failures (for example `console.warn`). Do not swallow them; a failed `init` is the usual reason pairing never starts.
 
 ## Step 5 — Mount the provider inside SafeAreaProvider
@@ -183,7 +190,7 @@ You run:
 - The app's typecheck.
 - The app's tests, if it has them.
 - `npx expo-doctor` (Expo).
-- The Babel plugin stamps: `node -e 'console.log(/nativeID: ?"uf_/.test(require("@babel/core").transformFileSync(process.argv[1]).code))' <a component file that renders a View or Text>` prints `true`.
+- The Babel plugin stamps: `node -e 'console.log(/nativeID: ?"uf_/.test(require("@babel/core").transformFileSync(process.argv[1]).code))' <file>` prints `true`. Pick a file that imports `View` or `Text` from `react-native` and renders it directly. A file that only renders wrappers such as `ThemedView` prints `false` even when the plugin works.
 - A bundle: `npx expo export --platform ios`, or `react-native bundle` for bare React Native. Delete the output afterwards (`expo export` writes `dist/`).
 
 If the typecheck reports errors from inside `node_modules/@userflow-tech/react-native/src` (a missing `.png` module or `@react-navigation/native`), the installed SDK version is too old for Expo's TypeScript setup. Tell the developer and suggest a newer version. Do not add stub declarations or extra dependencies to the app without their OK.
@@ -191,7 +198,7 @@ If the typecheck reports errors from inside `node_modules/@userflow-tech/react-n
 Then hand the customer the steps you cannot do:
 
 1. Rebuild and launch the native app. A Metro reload is not enough. With Expo, if `ios/` or `android/` already exists, `npx expo run:*` does not re-run prebuild, so the new scheme and native modules never reach the native project. Run `npx expo prebuild` first (never `--clean` without a yes). If those folders are committed and hand-edited, treat the app as bare and check the scheme in `Info.plist` and `AndroidManifest.xml`. Start Metro with a cleared cache once (`npx expo start -c`, or `npx react-native start --reset-cache`) so every file is stamped.
-2. Confirm the dev console has no `[Userflow]` setup warning. A complete install stays quiet.
+2. Confirm the dev console has no `[Userflow]` setup warning. A complete install stays quiet. The SDK runs these checks inside `Userflow.init`, so with a placeholder token (init skipped) a quiet console proves nothing. Repeat this check once a real `ct_` token is set.
 3. In the Builder, open Preview → "Pair a device" and scan the QR code. The app shows a "Preview mode" bar. Then press Preview.
 4. Select a tooltip target on the device, choosing an element without a `testID`. If it can't be selected, check that the Babel plugin is in the config and that Metro was started with a cleared cache.
 
