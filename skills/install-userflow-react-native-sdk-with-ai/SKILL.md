@@ -1,5 +1,5 @@
 ---
-name: install-react-native-with-ai
+name: install-userflow-react-native-sdk-with-ai
 description: Installs @userflow-tech/react-native into an Expo or bare React Native app, including Expo Router and React Navigation. Default install is init(), identify() after sign-in, reset() on logout, UserflowProvider, screen tracking, and the Babel plugin that lets authors select elements on the device. Use when someone wants to install Userflow in a React Native, Expo, Expo Router, or React Navigation app. Not for web apps or Userflow.js — those use install-with-ai.
 metadata:
   author: userflow

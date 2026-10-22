@@ -9,7 +9,7 @@ Work in your app's code.
 | Skill | What it does |
 |---|---|
 | [install-with-ai](install-with-ai/SKILL.md) | Installs Userflow.js into a new or existing web app. |
-| [install-react-native-with-ai](install-react-native-with-ai/SKILL.md) | Installs the React Native SDK into an Expo or bare app. |
+| [install-userflow-react-native-sdk-with-ai](install-userflow-react-native-sdk-with-ai/SKILL.md) | Installs the React Native SDK into an Expo or bare app. |
 | [verify-with-ai](verify-with-ai/SKILL.md) | Audits an existing Userflow.js install and reports issues by severity. |
 | [suggest-with-ai](suggest-with-ai/SKILL.md) | Recommends attributes, stable selectors and advanced Userflow.js functions for your app. |
 
