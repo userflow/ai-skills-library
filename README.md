@@ -4,7 +4,7 @@ Agent Skills for Userflow. Add them to your AI coding agent once, then describe 
 
 ## What's in the library
 
-- **Userflow Installation skills:** install, verify and improve Userflow.js in your app. No Userflow MCP needed.
+- **Userflow Installation skills:** install, verify and improve Userflow.js in a web app, and install the React Native SDK in an Expo or bare app. No Userflow MCP needed.
 - **Skills that report on your data:** read your Userflow data and return a report you can share.
 - **Skills that build things:** create content in your Userflow account after you confirm.
 

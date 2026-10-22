@@ -3,7 +3,7 @@ name: verify-with-ai
 description: Inspects an existing Userflow.js installation and reports whether it is correct — no duplicate init(), no leftover placeholders, token matches the environment, identify() only on the authenticated path, no identify()/identifyAnonymous() double-identification, isIdentified() false on public pages (the MAU check), and correct usage of any advanced functions already in use. Produces a severity-ranked report and applies fixes only after the customer confirms. Use when someone wants to verify, audit, review, or debug an existing Userflow install, or asks why Userflow content isn't showing or why their MAU count is high. Verification only — fresh installation is the install-with-ai skill.
 metadata:
   author: userflow
-  version: "1.1"
+  version: "1.2"
 ---
 
 # Userflow.js Verification
@@ -14,7 +14,7 @@ This skill inspects an existing Userflow.js installation and reports whether it 
 
 ## Scope
 
-Verification of an existing install only. This skill **reads first and reports** — it changes code only after the customer confirms a specific fix. If Userflow.js is not present in the codebase, say so and hand over to the `install-with-ai` skill. Recommending new attributes or advanced functions beyond what correctness requires is out of scope.
+Web only (Userflow.js). A React Native or Expo app is out of scope. Verification of an existing install only. This skill **reads first and reports** — it changes code only after the customer confirms a specific fix. If Userflow.js is not present in the codebase, say so and hand over to the `install-with-ai` skill. Recommending new attributes or advanced functions beyond what correctness requires is out of scope.
 
 ## Core Rules (non-negotiable — apply throughout)
 
