@@ -154,14 +154,18 @@ Always add `@userflow-tech/react-native/babel-plugin`. It stamps `View`, `Text`,
 
 1. No `babel.config.js` (common on Expo): create it with `npx expo customize babel.config.js`. Bare React Native already has one.
 2. Add the plugin to `plugins`, keeping the app's presets and plugins. If `plugins` lists `react-native-reanimated/plugin` or `react-native-worklets/plugin`, keep that one last.
-3. If the app has Jest, skip the plugin under test: Jest reads the same config, and the stamps rewrite snapshots. Remove `api.cache(true)`, because calling it before `api.env` throws `Caching has already been configured`, and `api.env` already caches per environment:
+3. If the app has Jest, skip this plugin under test: Jest reads the same config, and the stamps rewrite snapshots. Keep the app's own plugins in every environment, including under test. Remove `api.cache(true)`, because calling it before `api.env` throws `Caching has already been configured`, and `api.env` already caches per environment:
 
    ```js
    module.exports = function (api) {
      const isTest = api.env('test');
      return {
        presets: ['babel-preset-expo'], // keep the app's own presets
-       plugins: isTest ? [] : ['@userflow-tech/react-native/babel-plugin'],
+       plugins: [
+         // ...the app's own plugins
+         ...(isTest ? [] : ['@userflow-tech/react-native/babel-plugin']),
+         // react-native-reanimated/plugin or react-native-worklets/plugin, if present, stays last
+       ],
      };
    };
    ```
@@ -179,7 +183,7 @@ You run:
 - The app's typecheck.
 - The app's tests, if it has them.
 - `npx expo-doctor` (Expo).
-- The Babel plugin stamps: `node -e "console.log(/uf_/.test(require('@babel/core').transformFileSync(process.argv[1]).code))" <a component file that renders a View or Text>` prints `true`.
+- The Babel plugin stamps: `node -e 'console.log(/nativeID: ?"uf_/.test(require("@babel/core").transformFileSync(process.argv[1]).code))' <a component file that renders a View or Text>` prints `true`.
 - A bundle: `npx expo export --platform ios`, or `react-native bundle` for bare React Native. Delete the output afterwards (`expo export` writes `dist/`).
 
 If the typecheck reports errors from inside `node_modules/@userflow-tech/react-native/src` (a missing `.png` module or `@react-navigation/native`), the installed SDK version is too old for Expo's TypeScript setup. Tell the developer and suggest a newer version. Do not add stub declarations or extra dependencies to the app without their OK.
