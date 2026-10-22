@@ -3,7 +3,7 @@ name: install-react-native-with-ai
 description: Installs @userflow-tech/react-native into an Expo or bare React Native app, including Expo Router and React Navigation. Default install is init(), identify() after sign-in, reset() on logout, UserflowProvider, screen tracking, and the Babel plugin that lets authors select elements on the device. Use when someone wants to install Userflow in a React Native, Expo, Expo Router, or React Navigation app. Not for web apps or Userflow.js — those use install-with-ai.
 metadata:
   author: userflow
-  version: "1.1"
+  version: "1.0"
 ---
 
 # Userflow React Native Installation
@@ -42,12 +42,12 @@ Inspect before asking, and determine:
 
 | Read | Determine |
 |---|---|
-| `AGENTS.md`, `CLAUDE.md`, `README` | Project rules, read before writing code. Rules about where SDK code lives (for example "only `src/adoption/` imports the SDK") and gates such as "ask before installing" override this skill's default placement and steps. |
+| `AGENTS.md`, `CLAUDE.md`, `README` | Project rules, read before writing code. Rules about where SDK code lives and gates such as "ask before installing" override this skill's default placement and steps. |
 | `package.json` | Expo SDK and React Native versions; `expo-router` or `@react-navigation/native`; whether `@userflow-tech/react-native` or `userflow.js` is already installed; `react-native-safe-area-context`; a `test` script (Jest). If `userflow.js` is in this app, follow rule 8 and "If installation goes wrong, do not switch to the web SDK". The SDK requires React Native 0.76 or later (`react-native-view-shot` 5.x does not install below that). If this app is older, stop and say so. Do not upgrade React Native unless the developer explicitly agrees (rule 6). The SDK is tested up to Expo SDK 57. Expo SDK 58 and later bundle `react-native-webview` 14 and `react-native-view-shot` 6, which are outside the SDK's peer ranges. On Expo SDK 58 or later, tell the developer that version is not supported yet and stop. Do not force older WebView or view-shot versions onto it. |
 | Lockfile and `.yarnrc.yml` | npm, Yarn 2+, or pnpm |
 | `app.json` / `app.config.*`, `ios/`, `android/`, `babel.config.js` | Expo or bare; an existing Userflow config plugin; whether `babel.config.js` exists, its plugins, and `api.cache(true)` |
 | Root layout or `App.tsx`, and the auth code | Where `init()`, `identify()`, `reset()`, and `UserflowProvider` belong; the user-id field |
-| Analytics or adoption wrapper (`src/analytics/`, `src/adoption/`, a tracking facade) | Whether the app routes identity through its own layer. If it does, implement the SDK inside that wrapper instead of adding direct calls to the root layout, and say so in the confirmation. |
+| An existing analytics, adoption, or tracking wrapper | Whether the app routes identity through its own layer. If it does, implement the SDK inside that wrapper instead of adding direct calls to the root layout, and say so in the confirmation. |
 | Search the source for `userflow`, `Userflow`, and `identifyAnonymous(` | Existing Userflow code (rule 5). If the app already calls `identifyAnonymous()`, even through a no-op wrapper, ask whether to keep it before it reaches the real SDK: anonymous users count toward MAU (rule 1). |
 
 Confirm once, naming the real stack — e.g. *"Expo SDK 57 with Expo Router; the current user comes from `useAuth()` in `src/auth/AuthProvider.tsx`; the id is `user.id`, the same id the web app already sends to Userflow. I'll init at startup, identify whenever a user is signed in, reset on sign-out, and add the Babel plugin so you can select elements on the device. Correct?"* — then continue. Ask whether that id matches the web install when the customer has one. Also ask whether the environment has identity verification enabled. If it does, `identify()` fails without a signature from the customer's backend, so the Advanced identity verification item is required.
@@ -77,7 +77,7 @@ Install `react-native-safe-area-context` unless the app already depends on it. W
 
 ## Step 3 — Register the deep-link scheme
 
-Ask for the environment's `scheme_id`. It starts with `userflow-` (for example `userflow-v7twv2fw2ja2jaco7kesvowmem`). Reject an environment UUID and the app's own scheme.
+Ask for the environment's `scheme_id`. It starts with `userflow-` (for example `userflow-xxxxxxxxxxxxxxxxxxxxxxxxxx`). Reject an environment UUID and the app's own scheme.
 
 Expo, in `app.json` or `app.config.js`:
 
