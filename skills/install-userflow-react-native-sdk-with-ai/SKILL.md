@@ -32,7 +32,7 @@ If `package.json` has neither `react-native` nor `expo`, this is not a React Nat
 7. **Ask, don't guess,** for the `scheme_id`, the client token, where sign-in and logout happen, and which field is the user id.
 8. **One SDK: `@userflow-tech/react-native`.** Never install `userflow.js` or add a `js.userflow.com` script tag. Never load Userflow.js inside `react-native-webview`, and never call the web API (`userflow.init(token)`, `window.userflow`). The SDK's WebView peer exists for its own banners and Evaluate JavaScript actions, not to host Userflow.js. Installation trouble is never a reason to change SDKs: `ERESOLVE`, "not linked" warnings, Expo Go, `pod install` failures. Fix it through these steps and [troubleshooting.md](https://unpkg.com/@userflow-tech/react-native/docs/troubleshooting.md), or stop and report. See "If installation goes wrong, do not switch to the web SDK".
 
-After the package is installed, read `node_modules/@userflow-tech/react-native/README.md` and its `docs/` (especially `troubleshooting.md`, `deep-linking.md`, and `identity-verification.md`) and follow them. They match the installed version. The same pages are public: [README.md](https://unpkg.com/@userflow-tech/react-native/README.md), [troubleshooting.md](https://unpkg.com/@userflow-tech/react-native/docs/troubleshooting.md), [deep-linking.md](https://unpkg.com/@userflow-tech/react-native/docs/deep-linking.md), and [identity-verification.md](https://unpkg.com/@userflow-tech/react-native/docs/identity-verification.md). Do not quote warning strings from memory; search logs for the `[Userflow]` prefix.
+After the package is installed, read `node_modules/@userflow-tech/react-native/README.md` and its `docs/` (especially `troubleshooting.md`, `deep-linking.md`, and `identity-verification.md`) and follow them. They match the installed version. Where they disagree with this skill about view-shot pinning, `app/+native-intent.ts`, or the Babel plugin's Jest config, follow this skill: the 0.4.4 README predates those fixes. The same pages are public: [README.md](https://unpkg.com/@userflow-tech/react-native/README.md), [troubleshooting.md](https://unpkg.com/@userflow-tech/react-native/docs/troubleshooting.md), [deep-linking.md](https://unpkg.com/@userflow-tech/react-native/docs/deep-linking.md), and [identity-verification.md](https://unpkg.com/@userflow-tech/react-native/docs/identity-verification.md). Do not quote warning strings from memory; search logs for the `[Userflow]` prefix.
 
 ---
 
@@ -43,7 +43,7 @@ Inspect before asking, and determine:
 | Read | Determine |
 |---|---|
 | `AGENTS.md`, `CLAUDE.md`, `README` | Project rules, read before writing code. Rules about where SDK code lives and gates such as "ask before installing" override this skill's default placement and steps. |
-| `package.json` | Expo SDK and React Native versions; `expo-router` or `@react-navigation/native`; whether `@userflow-tech/react-native` or `userflow.js` is already installed; `react-native-safe-area-context`; a `test` script (Jest). If `userflow.js` is in this app, follow rule 8 and "If installation goes wrong, do not switch to the web SDK". The SDK requires React Native 0.76 or later (`react-native-view-shot` 5.x does not install below that). If this app is older, stop and say so. Do not upgrade React Native unless the developer explicitly agrees (rule 6). The SDK is tested up to Expo SDK 57. Expo SDK 58 and later bundle `react-native-webview` 14 and `react-native-view-shot` 6, which are outside the SDK's peer ranges. On Expo SDK 58 or later, tell the developer that version is not supported yet and stop. Do not force older WebView or view-shot versions onto it. |
+| `package.json` | Expo SDK and React Native versions; `expo-router` or `@react-navigation/native`; whether `@userflow-tech/react-native` or `userflow.js` is already installed; `react-native-safe-area-context`; a `test` script (Jest); `react-native-web` or a `web` section in the Expo config (the app also builds for web, Step 4); `react-native-view-shot` in `expo.install.exclude` (Step 2). If `userflow.js` is in this app, follow rule 8 and "If installation goes wrong, do not switch to the web SDK". The SDK requires React Native 0.76 or later (`react-native-view-shot` 5.x does not install below that). If this app is older, stop and say so. Do not upgrade React Native unless the developer explicitly agrees (rule 6). The SDK is tested up to Expo SDK 57. Expo SDK 58 and later bundle `react-native-webview` 14 and `react-native-view-shot` 6, which are outside the SDK's peer ranges. On Expo SDK 58 or later, tell the developer that version is not supported yet and stop. Do not force older WebView or view-shot versions onto it. |
 | Lockfile and `.yarnrc.yml` | npm, Yarn 2+, or pnpm |
 | `app.json` / `app.config.*`, `ios/`, `android/`, `babel.config.js` | Expo or bare; an existing Userflow config plugin; whether `babel.config.js` exists, its plugins, and `api.cache(true)` |
 | Root layout or `App.tsx`, and the auth code | Where `init()`, `identify()`, `reset()`, and `UserflowProvider` belong; the user-id field; or that the app has no sign-in (Step 4) |
@@ -57,6 +57,8 @@ No repository access: do not invent paths. Ask for the stack, auth entry points,
 ## Step 2 — Install the packages
 
 List every native module in the app's own `package.json`. Expo SDK 53 and older, and bare React Native, do not autolink packages that are only transitive dependencies. Leave out a package the app already lists at a version that satisfies the SDK, so its existing pin is kept.
+
+On Expo SDK 56 and 57, check `expo.install.exclude` in `package.json` first. If it lists `react-native-view-shot` (left by the 0.4.4 README or by an app upgraded from SDK 55 or older), remove that entry before installing. With it in place, Expo installs the latest view-shot instead of 5.1.0, and `npx expo-doctor` skips the check, so nothing flags it.
 
 ```bash
 # Expo SDK 56–57 (drop any package the app already lists at a satisfying version)
@@ -72,7 +74,7 @@ cd ios && pod install
 
 Keep the version ranges in the bare command. Unpinned, npm picks the latest majors: `react-native-webview` 14 is outside the SDK's range, and npm only warns `ERESOLVE overriding peer dependency` and installs it anyway. AsyncStorage 3 sits next to the SDK's own 2.x copy, which leaves two copies of one native module. Treat an `overriding peer dependency` warning as a failed install. `npx expo install` picks Expo's bundled versions, which fit the SDK's ranges on Expo SDK 53–57, except view-shot on Expo SDK 55 and older.
 
-Use the app's package manager. On Expo SDK 56 and 57, leave view-shot unpinned. Expo bundles 5.1.0, which satisfies `^5.0.0`. A `^5.0.0` pin resolves the newest 5.x on a fresh install, and `npx expo-doctor` then fails ("expected 5.1.0, found 5.1.1"). If that happened, rerun `npx expo install react-native-view-shot` instead of adding an exclude. If `react-native-view-shot` is already in `expo.install.exclude` (the 0.4.4 README said to add it), remove it first, then rerun. With the exclude in place, Expo installs the latest view-shot instead of 5.1.0: the rerun keeps 5.1.1, a clean install gets 6.x (outside `^5.0.0`), and `npx expo-doctor` passes because the check is skipped.
+Use the app's package manager. On Expo SDK 56 and 57, leave view-shot unpinned. Expo bundles 5.1.0, which satisfies `^5.0.0`. A `^5.0.0` pin resolves the newest 5.x on a fresh install, and `npx expo-doctor` then fails ("expected 5.1.0, found 5.1.1"). If that happened, rerun `npx expo install react-native-view-shot` instead of adding an exclude, after removing any view-shot exclude (above). With the exclude still set, the rerun keeps 5.1.1 and a clean install gets 6.x (outside `^5.0.0`).
 
 On Expo SDK 55 and older, unpinned `npx expo install react-native-view-shot` resolves 4.0.3, which does not satisfy `^5.0.0`. If `package.json` already has view-shot below 5, keep `react-native-view-shot@^5.0.0` in the same install command as `@userflow-tech/react-native`. Installing the SDK alone fails with `ERESOLVE`. The two lines that matter are `Found: react-native-view-shot@4.0.3` and `peer react-native-view-shot@"^5.0.0" from @userflow-tech/react-native`. Rerun the Expo SDK 55 and older command above. Do not retry with `--force` or `--legacy-peer-deps`; that installs the SDK and leaves 4.0.3 in place. On Expo SDK 55 and older, in the same step as pinning `^5.0.0`, add `"react-native-view-shot"` to `expo.install.exclude` in `package.json` (`"expo": { "install": { "exclude": ["react-native-view-shot"] } }`). Without it, `npx expo-doctor` fails ("expected 4.0.3, found 5.1.1") and `npx expo install --fix` downgrades view-shot. Once the exclude is set, always install view-shot as `react-native-view-shot@^5.0.0`. Unpinned, Expo skips its version, so npm can keep 4.0.3 or pull 6.x.
 
@@ -106,6 +108,7 @@ await Userflow.identify(user.id, { name: user.name, email: user.email });
 ```
 
 - `init` at startup, before `identify`. A second `init` with different options is ignored until the app restarts. When startup code and the auth code both need it, put the `init` call in one small module that both await.
+- Expo apps that also build for web (Step 1): keep the SDK off web. It supports iOS and Android only, but it still connects to Userflow if it runs in the browser, and would identify web visitors. In the shared init module, skip `Userflow.init` when `Platform.OS === 'web'` (from `react-native`), and skip `identify` and `reset` whenever `init` was skipped. `UserflowProvider` and the screen tracker can stay mounted on web; without `init` they render nothing and send nothing.
 - `identify` wherever the app learns who the current user is: an auth-state listener or the current-user value from the auth context. Hooking only the sign-in function misses sign-up, demo or magic-link sign-in, and restored sessions. Await `init` first.
 - `reset` when a signed-in user signs out.
 - No sign-in at all: there is no user to identify, and flows and Builder previews only reach an identified user (a preview link waits for `identify`). Tell the developer. The only option is `identifyAnonymous()`, which counts every device that opens the app toward MAU (rule 1). Add it only with an explicit yes. Add no `reset()`, since nothing signs out. If they decline, finish the rest of the install and tell them that flows and the Step 9 preview check won't work until the app identifies a user.
@@ -148,7 +151,11 @@ React Navigation does not. Wrap the app yourself:
 
   const userflowRedirect = createRedirectSystemPath({ next: hostRedirect }); // omit `next` if the host only logs
   export function redirectSystemPath(event: RedirectSystemPathOptions) {
-    hostLog(event);
+    try {
+      hostLog(event);
+    } catch {
+      // Expo warns that throwing here can crash the app on launch.
+    }
     return userflowRedirect(event);
   }
   ```
@@ -183,6 +190,19 @@ Tell the developer that stamped ids come from the file path, sibling order, and 
 
 If the app has Jest, mock the SDK in the Jest setup file so tests do not load native modules. Copy the mock from the Jest section of the installed package README. Include the methods the app calls, and also mock the router entry the app imports (`@userflow-tech/react-native/expo-router` or `/navigation`), with every export the app uses from it. In a TypeScript setup file, type the provider's `children` as `ReactNode` so strict mode passes.
 
+Expo Router loads `app/+native-intent.ts` when a test renders the router, so the `/expo-router` mock also needs what that file imports. Use these stubs; a bare `jest.fn()` returns `undefined` and breaks the router or the wrapper:
+
+```ts
+jest.mock('@userflow-tech/react-native/expo-router', () => ({
+  UserflowExpoRouterScreenTracker: () => null,
+  redirectSystemPath: ({ path }: { path: string }) => path,
+  createRedirectSystemPath:
+    ({ next }: { next?: (event: { path: string }) => unknown } = {}) =>
+    (event: { path: string }) =>
+      next ? next(event) : event.path,
+}));
+```
+
 ## Step 9 — Verify
 
 You run:
@@ -191,7 +211,7 @@ You run:
 - The app's tests, if it has them.
 - `npx expo-doctor` (Expo).
 - The Babel plugin stamps: `node -e 'console.log(/nativeID: ?"uf_/.test(require("@babel/core").transformFileSync(process.argv[1]).code))' <file>` prints `true`. Pick a file whose code literally uses the tag `<View>` or `<Text>` on an element without a `testID`, `nativeID`, or `userflowId`. The plugin matches the tag name, not the import, so a file that renders an aliased import such as `<DefaultView>`, or only wrappers such as `<ThemedView>`, prints `false` even when the plugin works.
-- A bundle: `npx expo export --platform ios`, or `react-native bundle` for bare React Native. Delete the output afterwards (`expo export` writes `dist/`).
+- A bundle: `npx expo export --platform ios`, or `react-native bundle` for bare React Native. If the app also builds for web, export `--platform web` too. Delete the output afterwards (`expo export` writes `dist/`).
 
 If the typecheck reports errors from inside `node_modules/@userflow-tech/react-native/src` (a missing `.png` module or `@react-navigation/native`), the installed SDK version is too old for Expo's TypeScript setup. Tell the developer and suggest a newer version. Do not add stub declarations or extra dependencies to the app without their OK.
 
@@ -212,7 +232,7 @@ Search device logs for `[Userflow]` if any of those fail, and match the line to 
 - The server error `Invalid Userflow.js Token` is the backend's name for the client token. It means the `ct_` token is wrong, not that `userflow.js` is needed.
 - `window is not defined` or `document is not defined` means web code got into the native bundle. Remove that code; do not add more of it.
 - `userflow.js` already present in this app's `package.json` or imports is a leftover from a wrong-SDK attempt. Report it and remove it only with a yes. In a monorepo, leave a separate web app's `userflow.js` alone.
-- Expo apps that also build for web: this SDK covers iOS and Android. Userflow in the web build of an Expo app isn't supported yet; tell the customer if they ask, and don't add Userflow.js to it.
+- Expo apps that also build for web: this SDK covers iOS and Android. Userflow in the web build of an Expo app isn't supported yet; tell the customer if they ask, and don't add Userflow.js to it. Step 4 keeps the SDK from running there.
 
 ## Step 10 — Document
 
