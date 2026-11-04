@@ -32,7 +32,19 @@ Create content in your Userflow account after you confirm.
 |---|---|
 | [userflow-announcement-creator](userflow-announcement-creator/SKILL.md) | Drafts an in-app announcement from a summary, doc or ticket. |
 | [userflow-banner-creator](userflow-banner-creator/SKILL.md) | Drafts an in-app banner from a summary, doc or ticket. |
+| [userflow-create-adoption-nudges](userflow-create-adoption-nudges/SKILL.md) | Finds under-used features and drafts unpublished nudges, walkthroughs and funnel charts. |
+| [userflow-create-reactive-flows](userflow-create-reactive-flows/SKILL.md) | Turns repeated questions into unpublished link-started walkthroughs. |
 | [userflow-segment-creator](userflow-segment-creator/SKILL.md) | Builds a segment from a plain-language audience description. |
+
+## Skills that audit, then change
+
+Read your Userflow account and any connected tools, show a plan, and write only after you approve.
+
+| Skill | What it does |
+|---|---|
+| [userflow-knowledge-loop](userflow-knowledge-loop/SKILL.md) | Audits your help center from Adoption Agent and support questions, team-chat threads marked for the KB, and recent product changes, sends drafted articles for approval in your messaging tool, and publishes only what your reviewer approves to whatever help center tool you use (or hands them off to paste). Also drafts personal follow-ups, tracked as tasks, for users the Adoption Agent couldn't answer. |
+| [userflow-optimize-autostart](userflow-optimize-autostart/SKILL.md) | Audits auto-starting flows, checklists, banners and popup announcements, then applies the fixes you approve as unpublished drafts. |
+| [userflow-optimize-labels](userflow-optimize-labels/SKILL.md) | Builds a label taxonomy if needed, labels published content after you approve, and shows what is live. |
 
 ## Install one skill
 ```bash
