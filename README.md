@@ -48,3 +48,7 @@ Change the destination to wherever your agent reads skills.
 ## Need help?
 
 Reach out to your Userflow contact or post in the in-app help.
+
+## License
+
+[MIT](LICENSE)
