@@ -9,9 +9,5 @@
   "homepage": "https://github.com/userflow/ai-skills-library",
   "repository": "https://github.com/userflow/ai-skills-library",
   "license": "MIT",
-  "keywords": [
-    "userflow",
-    "product-adoption",
-    "installation"
-  ]
+  "keywords": ["userflow", "product-adoption", "installation"]
 }
