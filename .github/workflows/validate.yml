@@ -5,17 +5,66 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
+        with:
+          # Full history so the version-bump check can diff against the previous commit.
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
           node-version: "22"
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Install Python tools
+        run: pip install --quiet pyyaml==6.0.3 check-jsonschema==0.38.2
+
+      - name: Check referenced files exist
+        run: |
+          fail=0
+          for d in skills/*/; do
+            for r in $(grep -oE '(references|scripts|assets)/[A-Za-z0-9_.-]+' "$d/SKILL.md" | sort -u); do
+              [ -e "$d$r" ] || { echo "MISSING: $d$r"; fail=1; }
+            done
+          done
+          exit $fail
+
+      # Cross-manifest drift, broken manifest paths, spec-only frontmatter,
+      # trust boundaries, index coverage, tracked junk files and the version bump.
+      - name: Repo checks
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          # Version-bump check: on a push, compare with the commit main was at
+          # before the push; on a pull request, with the base branch.
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            base="origin/$BASE_REF"
+          else
+            base="$BEFORE_SHA"
+          fi
+          if [ -n "$base" ] && [ "$base" != "0000000000000000000000000000000000000000" ]; then
+            python3 scripts/validate_repo.py --base "$base"
+          else
+            python3 scripts/validate_repo.py
+          fi
 
       # Validate skill-spec compliance (frontmatter structure, name/description constraints).
       - name: Validate skill spec (skills-ref)
@@ -25,6 +74,17 @@ jobs:
             npx --yes skills-ref validate "$skill"
           done
 
+      # Cursor, Agent Plugins (VS Code / Copilot), Antigravity and skills.sh publish
+      # JSON schemas. Codex and Gemini CLI don't, so validate_repo.py covers those.
+      - name: Validate manifests against published schemas
+        run: |
+          CURSOR=https://raw.githubusercontent.com/cursor/plugins/2776ddd2355d6d6c8747d3964600f28daf62f049/schemas
+          check-jsonschema --schemafile "$CURSOR/plugin.schema.json" .cursor-plugin/plugin.json
+          check-jsonschema --schemafile "$CURSOR/marketplace.schema.json" .cursor-plugin/marketplace.json
+          check-jsonschema --schemafile https://agent-plugins.org/schemas/1.0.0/plugin.schema.json plugin.json
+          check-jsonschema --schemafile https://antigravity.google/schemas/v1/plugin.json .antigravity-plugin/plugin.json
+          check-jsonschema --schemafile https://skills.sh/schemas/skills.sh.schema.json skills.sh.json
+
       # Claude Code packaging: marketplace.json + plugin.json + skill frontmatter.
       # --strict treats warnings (non-kebab-case names, unknown fields) as errors.
       - name: Install Claude Code
@@ -32,3 +92,7 @@ jobs:
 
       - name: Validate Claude Code plugin packaging
         run: claude plugin validate . --strict
+
+      # What the Claude plugin directory refuses a submission for.
+      - name: Claude plugin directory checks
+        run: claude plugin validate . --profile directory --strict

@@ -1,0 +1,20 @@
+{
+  "name": "ai-skills-library",
+  "interface": {
+    "displayName": "Userflow"
+  },
+  "plugins": [
+    {
+      "name": "userflow",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/userflow/ai-skills-library.git"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

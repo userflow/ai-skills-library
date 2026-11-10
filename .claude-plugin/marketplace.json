@@ -1,16 +1,36 @@
 {
   "name": "ai-skills-library",
+  "description": "Userflow's library of Agent Skills for AI agents.",
+  "metadata": {
+    "description": "Userflow's library of Agent Skills for AI agents."
+  },
   "owner": {
     "name": "Userflow",
-    "email": "support@userflow.com"
+    "email": "support@userflow.com",
+    "url": "https://www.userflow.com"
   },
-  "description": "Userflow's library of Agent Skills for AI coding agents.",
   "plugins": [
     {
       "name": "userflow",
-      "source": ".",
-      "description": "Userflow skills for AI coding agents.",
-      "keywords": ["userflow", "product-adoption", "installation"]
+      "source": "./",
+      "description": "Userflow skills for AI agents: install and verify Userflow.js, report on flows, NPS and Adoption Agent data, and build announcements, banners, segments and flows in your Userflow account.",
+      "author": {
+        "name": "Userflow",
+        "email": "support@userflow.com",
+        "url": "https://www.userflow.com"
+      },
+      "homepage": "https://help.userflow.com/docs/ai-skills-library",
+      "repository": "https://github.com/userflow/ai-skills-library",
+      "keywords": [
+        "userflow",
+        "product-adoption",
+        "onboarding",
+        "installation",
+        "analytics",
+        "nps",
+        "mcp"
+      ],
+      "license": "MIT"
     }
   ]
 }

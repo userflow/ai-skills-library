@@ -1,0 +1,46 @@
+{
+  "name": "userflow",
+  "version": "1.3.0",
+  "description": "Userflow skills for AI agents: install and verify Userflow.js, report on flows, NPS and Adoption Agent data, and build announcements, banners, segments and flows in your Userflow account.",
+  "author": {
+    "name": "Userflow",
+    "email": "support@userflow.com",
+    "url": "https://www.userflow.com"
+  },
+  "homepage": "https://help.userflow.com/docs/ai-skills-library",
+  "repository": "https://github.com/userflow/ai-skills-library",
+  "license": "MIT",
+  "keywords": [
+    "userflow",
+    "product-adoption",
+    "onboarding",
+    "installation",
+    "analytics",
+    "nps",
+    "mcp"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Userflow",
+    "shortDescription": "Install Userflow and work with your Userflow data",
+    "longDescription": "Install and verify Userflow.js or the React Native SDK in your codebase, report on flows, NPS comments and Adoption Agent conversations, and draft announcements, banners, segments and flows in your Userflow account. Account skills use the Userflow MCP, which you connect separately.",
+    "developerName": "Userflow",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://www.userflow.com",
+    "privacyPolicyURL": "https://www.userflow.com/policies/privacy",
+    "termsOfServiceURL": "https://www.userflow.com/policies/terms",
+    "defaultPrompt": [
+      "Install Userflow.js in this app",
+      "Summarise last quarter's NPS comments",
+      "Audit my help center and find the gaps"
+    ],
+    "brandColor": "#121941",
+    "composerIcon": "./assets/logo.svg",
+    "logo": "./assets/logo.svg",
+    "screenshots": []
+  }
+}

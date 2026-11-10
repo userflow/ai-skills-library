@@ -1,0 +1,14 @@
+{
+  "name": "ai-skills-library",
+  "owner": {
+    "name": "Userflow",
+    "email": "support@userflow.com"
+  },
+  "plugins": [
+    {
+      "name": "userflow",
+      "source": "./",
+      "description": "Userflow skills for AI agents: install and verify Userflow.js, report on flows, NPS and Adoption Agent data, and build announcements, banners, segments and flows in your Userflow account."
+    }
+  ]
+}

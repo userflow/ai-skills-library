@@ -1,0 +1,23 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "userflow",
+  "version": "1.3.0",
+  "description": "Userflow skills for AI agents: install and verify Userflow.js, report on flows, NPS and Adoption Agent data, and build announcements, banners, segments and flows in your Userflow account.",
+  "author": {
+    "name": "Userflow",
+    "email": "support@userflow.com",
+    "url": "https://www.userflow.com"
+  },
+  "homepage": "https://help.userflow.com/docs/ai-skills-library",
+  "repository": "https://github.com/userflow/ai-skills-library",
+  "license": "MIT",
+  "keywords": [
+    "userflow",
+    "product-adoption",
+    "onboarding",
+    "installation",
+    "analytics",
+    "nps",
+    "mcp"
+  ]
+}

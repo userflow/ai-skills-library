@@ -3,7 +3,7 @@ name: userflow-flow-segment-compare
 description: Compare how a single piece of Userflow content performs across several audience segments, rendered as a dashboard — a key-metrics comparison table plus trend charts. Works for ANY Userflow flow type (guide flows, announcements, banners, checklists, launchers, resource centers, embeds), not just flows and announcements. Content is chosen from a searchable dropdown; the "segments" are whatever the user wants to compare — existing account segments, ad-hoc filters built just for this analysis, or a mix — and ad-hoc ones are never saved to the account. Use whenever a user with the Userflow MCP connected wants to "compare a flow/announcement/banner across segments", "how does [content] perform for [group A] vs [group B]", "break down [content] by audience/user type", or any per-audience performance breakdown of one piece of content. Different from userflow-flow-compare (two flows head-to-head) — here it's ONE piece of content across MANY audiences. Requires the Userflow MCP connector.
 metadata:
   author: userflow
-  version: "1.0"
+  version: "1.1"
 ---
 
 # Userflow Content × Segment Compare
@@ -109,8 +109,8 @@ segment.
 
 ## Phase 5 — Build the dashboard
 
-Produce a **self-contained HTML dashboard** (a file artifact). Before writing HTML, read
-**`userflow-brand-visuals`** and **`frontend-design`** so it's on-brand. Follow
+Produce a **self-contained HTML dashboard** (a file artifact). If the **`userflow-brand-visuals`**
+and **`frontend-design`** skills are available, read them before writing HTML so it's on-brand. Follow
 `references/dashboard-spec.md`. At minimum:
 
 1. **Header** — content name, type, time window, and the segments compared.
@@ -120,8 +120,11 @@ Produce a **self-contained HTML dashboard** (a file artifact). Before writing HT
    over the shared time buckets.
 
 Flag any low-sample or zero-data segment so a flat line isn't misread. Save to
-`/mnt/user-data/outputs/` and present it, then offer to iterate (add/drop a segment, change window or
-metrics).
+`/mnt/user-data/outputs/` and present it with `present_files` when those are available. Otherwise, if
+you can write files, save the HTML in the current working directory and give the user the path. If you
+can't write files at all, put the comparison table in chat as a markdown table, followed by one markdown
+table per key metric (rows = time buckets, columns = segments). Low-sample flags still apply. Then offer
+to iterate (add/drop a segment, change window or metrics).
 
 ---
 

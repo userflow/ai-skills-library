@@ -1,0 +1,46 @@
+{
+  "$schema": "https://skills.sh/schemas/skills.sh.schema.json",
+  "notGrouped": "bottom",
+  "groupings": [
+    {
+      "title": "Install Userflow",
+      "description": "Install, verify and improve Userflow in your app's code. No Userflow MCP needed.",
+      "skills": [
+        "install-with-ai",
+        "install-userflow-react-native-sdk-with-ai",
+        "verify-with-ai",
+        "suggest-with-ai"
+      ]
+    },
+    {
+      "title": "Report on your data",
+      "description": "Read your Userflow data through the Userflow MCP and return a report.",
+      "skills": [
+        "userflow-adoption-agent-topics",
+        "userflow-flow-compare",
+        "userflow-flow-segment-compare",
+        "userflow-nps-summariser"
+      ]
+    },
+    {
+      "title": "Build things",
+      "description": "Create content in your Userflow account after you confirm.",
+      "skills": [
+        "userflow-announcement-creator",
+        "userflow-banner-creator",
+        "userflow-create-adoption-nudges",
+        "userflow-create-reactive-flows",
+        "userflow-segment-creator"
+      ]
+    },
+    {
+      "title": "Audit, then change",
+      "description": "Audit your Userflow account, show a plan, and write only what you approve.",
+      "skills": [
+        "userflow-knowledge-loop",
+        "userflow-optimize-autostart",
+        "userflow-optimize-labels"
+      ]
+    }
+  ]
+}

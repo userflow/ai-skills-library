@@ -3,7 +3,7 @@ name: userflow-flow-compare
 description: Compare two Userflow flows of the same type side by side in an interactive dashboard — views, completions, completion rate, step-funnel drop-off, missing element errors, trends, and improvement insights. Use this skill whenever the user with the Userflow MCP connected asks to "compare flows", "compare these two flows/announcements/checklists", "which flow performs better", "flow A vs flow B", "benchmark my onboarding flows", or wants any head-to-head performance comparison of Userflow content. Also trigger when a picker widget from this skill sends a prompt like "Compare these two ... flows over ... Build the comparison dashboard". Requires the Userflow MCP connector.
 metadata:
   author: userflow
-  version: "1.0"
+  version: "1.1"
 ---
 
 # Userflow flow compare
@@ -20,6 +20,16 @@ If the user already named two flows and a range in their message, skip the picke
 
 1. Load Userflow tools via `tool_search` if not already loaded: `list_flows`, `describe_session`, `query_flow_metrics`, `query_usage_metrics`, `get_flow_details`.
 2. Call `describe_session` once to get `env_id`. Default to the Production environment; only ask the user if there are multiple non-obvious environments.
+
+## Without the Visualizer
+
+The picker and dashboard use claude.ai's Visualizer (`visualize:read_me`, `visualize:show_widget`, `sendPrompt`). If those tools aren't available (for example in Claude Code, Codex, Cursor, or ChatGPT), run the same steps and calls, but present the results in plain text:
+
+- **Picker:** show the comparable published flows as a numbered markdown table grouped by type (name, type, first 8 characters of the ID, last edited). Ask the user to reply with two numbers of the same type and a range (default: last 1 month). If the types differ, say so and ask again.
+- **Dashboard:** show a metrics table (one row per metric, one column per flow, plus the difference), a step-funnel table for guide flows and checklists (step, views, drop % from the previous step, worst drop in bold), and a views-per-period table in place of the line chart.
+- **Follow-ups:** suggest them in one line of text instead of buttons.
+
+The insights section doesn't change.
 
 ## Phase 1 — picker
 
