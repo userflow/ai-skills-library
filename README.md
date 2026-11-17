@@ -34,6 +34,7 @@ Read your Userflow data and return a report.
 |---|---|
 | [userflow-adoption-agent-topics](skills/userflow-adoption-agent-topics/SKILL.md) | Reports what people asked your Adoption Agent and where it fell short. |
 | [userflow-flow-compare](skills/userflow-flow-compare/SKILL.md) | Compares two flows of the same type side by side. |
+| [userflow-flow-review](skills/userflow-flow-review/SKILL.md) | Reviews flows for problems that stop them from starting, finding their tooltip element or letting users finish, with a fix for each. |
 | [userflow-flow-segment-compare](skills/userflow-flow-segment-compare/SKILL.md) | Compares one piece of content across audience segments. |
 | [userflow-nps-summariser](skills/userflow-nps-summariser/SKILL.md) | Groups NPS comments into positive and negative themes. |
 
