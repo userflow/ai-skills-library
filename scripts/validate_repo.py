@@ -55,6 +55,11 @@ SPEC_FRONTMATTER_KEYS = {
 # one needs a "## Trust boundary" section.
 END_USER_CONTENT_TOOLS = ("list_adoption_agent_conversations", "list_survey_responses")
 NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
+# major.minor.patch only, no pre-release suffix. Must match the check in
+# .github/workflows/build-zips.yml, which tags each release with this version.
+VERSION_RE = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
+# The all-skills zip build-zips.yml adds to each release. Keep the two in sync.
+BUNDLE_ZIP = "userflow-all-ai-skills"
 JUNK_RE = re.compile(r"(^|/)(\.DS_Store|Thumbs\.db|desktop\.ini|__MACOSX)(/|$)")
 # Files whose change reaches installed users and so needs a version bump.
 SHIPPED_PATHS = ("skills/", "assets/", ".claude-plugin/", ".codex-plugin/", ".cursor-plugin/",
@@ -88,6 +93,9 @@ def git(*args: str) -> str:
 def check_manifests() -> dict:
     claude = load_json(".claude-plugin/plugin.json") or {}
     ref_name, ref_version, ref_desc = claude.get("name"), claude.get("version"), claude.get("description")
+    # The other manifests must match this one, so checking it covers all of them.
+    if not isinstance(ref_version, str) or not VERSION_RE.match(ref_version):
+        fail(f".claude-plugin/plugin.json: version must be major.minor.patch, like 1.4.0 (got {ref_version!r})")
 
     for rel in PLUGIN_MANIFESTS:
         data = load_json(rel)
@@ -191,6 +199,16 @@ def check_indexes(skill_names: list[str]) -> None:
     for n in skill_names:
         if f"](skills/{n}/SKILL.md)" not in index:
             fail(f"README.md: {n} isn't listed in a skills table")
+    # The Download table links each skill's release zip, which build-zips.yml
+    # names after the skill folder. A missing row means no download link; a row
+    # for a removed or renamed skill is a link that 404s.
+    download_prefix = "https://github.com/userflow/ai-skills-library/releases/latest/download/"
+    for n in skill_names:
+        if f"]({download_prefix}{n}.zip)" not in index:
+            fail(f"README.md: {n} has no row in the Download table")
+    for n in re.findall(re.escape(download_prefix) + r"([A-Za-z0-9_.-]+)\.zip\)", index):
+        if n != BUNDLE_ZIP and n not in skill_names:
+            fail(f"README.md: Download table links {n}.zip, but there's no skill folder {n}")
     grouping = load_json("skills.sh.json") or {}
     grouped = [s for g in grouping.get("groupings", []) for s in g.get("skills", [])]
     for n in skill_names:

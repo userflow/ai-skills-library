@@ -72,9 +72,37 @@ Everyone signs in with their own Userflow login, so the MCP can only see and do 
 
 ## Install
 
+### Download Skills
+
+Apps that install skills from a file, like claude.ai and Claude Desktop, need one zip per skill. Download the zip, then upload it in your app's skills settings. These links always give you the latest release.
+
+| Skill | Download |
+|---|---|
+| install-with-ai | [Download](https://github.com/userflow/ai-skills-library/releases/latest/download/install-with-ai.zip) |
+| verify-with-ai | [Download](https://github.com/userflow/ai-skills-library/releases/latest/download/verify-with-ai.zip) |
+| suggest-with-ai | [Download](https://github.com/userflow/ai-skills-library/releases/latest/download/suggest-with-ai.zip) |
+| install-userflow-react-native-sdk-with-ai | [Download](https://github.com/userflow/ai-skills-library/releases/latest/download/install-userflow-react-native-sdk-with-ai.zip) |
+| userflow-adoption-agent-topics | [Download](https://github.com/userflow/ai-skills-library/releases/latest/download/userflow-adoption-agent-topics.zip) |
+| userflow-announcement-creator | [Download](https://github.com/userflow/ai-skills-library/releases/latest/download/userflow-announcement-creator.zip) |
+| userflow-banner-creator | [Download](https://github.com/userflow/ai-skills-library/releases/latest/download/userflow-banner-creator.zip) |
+| userflow-create-adoption-nudges | [Download](https://github.com/userflow/ai-skills-library/releases/latest/download/userflow-create-adoption-nudges.zip) |
+| userflow-create-reactive-flows | [Download](https://github.com/userflow/ai-skills-library/releases/latest/download/userflow-create-reactive-flows.zip) |
+| userflow-flow-compare | [Download](https://github.com/userflow/ai-skills-library/releases/latest/download/userflow-flow-compare.zip) |
+| userflow-flow-review | [Download](https://github.com/userflow/ai-skills-library/releases/latest/download/userflow-flow-review.zip) |
+| userflow-flow-segment-compare | [Download](https://github.com/userflow/ai-skills-library/releases/latest/download/userflow-flow-segment-compare.zip) |
+| userflow-knowledge-loop | [Download](https://github.com/userflow/ai-skills-library/releases/latest/download/userflow-knowledge-loop.zip) |
+| userflow-nps-summariser | [Download](https://github.com/userflow/ai-skills-library/releases/latest/download/userflow-nps-summariser.zip) |
+| userflow-optimize-autostart | [Download](https://github.com/userflow/ai-skills-library/releases/latest/download/userflow-optimize-autostart.zip) |
+| userflow-optimize-labels | [Download](https://github.com/userflow/ai-skills-library/releases/latest/download/userflow-optimize-labels.zip) |
+| userflow-segment-creator | [Download](https://github.com/userflow/ai-skills-library/releases/latest/download/userflow-segment-creator.zip) |
+
+To get every skill at once, download [userflow-all-ai-skills.zip](https://github.com/userflow/ai-skills-library/releases/latest/download/userflow-all-ai-skills.zip) and copy the folders inside its `skills/` folder into your agent's skills folder (see [Manual](#manual-any-agent)). Don't upload it to claude.ai or Claude Desktop, which take one skill per zip.
+
+Older versions are on the [Releases](https://github.com/userflow/ai-skills-library/releases) page.
+
 ### Claude (claude.ai and Claude Desktop)
 
-Upload the skills you want as files. See [Download](#download-claude-and-other-apps-that-take-a-file).
+Upload the skills you want as files. See [Download Skills](#download-skills).
 
 ### Claude Code
 
@@ -149,16 +177,6 @@ cp -r ai-skills-library/skills/<skill-name> ~/.agents/skills/
 | Cursor | `~/.cursor/skills/` |
 | GitHub Copilot | `~/.copilot/skills/` |
 | Gemini CLI | `~/.gemini/skills/` |
-
-### Download (Claude and other apps that take a file)
-
-Apps that install skills from a file, like claude.ai and Claude Desktop, need one zip per skill.
-
-1. Download this repository (**Code → Download ZIP**) and unzip it.
-2. Zip the whole skill folder you want from `skills/`, for example `skills/install-with-ai`. The folder itself goes in the zip, with `SKILL.md` inside it.
-3. Upload that zip in your app's skills settings.
-
-Ready-made zips of every skill are on the [Userflow help center](https://help.userflow.com/docs/ai-skills-library).
 
 ## Need help?
 

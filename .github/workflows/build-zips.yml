@@ -1,0 +1,139 @@
+name: build-zips
+
+on:
+  workflow_run:
+    workflows: [validate]
+    types: [completed]
+    branches: [main]
+
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: Commit on main to release (leave empty for the latest commit on main)
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+  actions: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  release:
+    if: >-
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push') ||
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+
+    concurrency:
+      group: build-zips
+      cancel-in-progress: false
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Pick the commit
+        id: commit
+        env:
+          RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+          INPUT_SHA: ${{ inputs.sha }}
+        run: |
+          if [ -n "$RUN_SHA" ]; then
+            # Triggered by a validate run that passed on a push to main.
+            echo "sha=$RUN_SHA" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          ref="${INPUT_SHA:-$GITHUB_SHA}"
+          if ! [[ "$ref" =~ ^[0-9a-f]{7,40}$ ]]; then
+            echo "::error::sha must be a commit hash (got '$ref')"
+            exit 1
+          fi
+          sha=$(gh api "repos/$GITHUB_REPOSITORY/commits/$ref" --jq .sha)
+          status=$(gh api "repos/$GITHUB_REPOSITORY/compare/$sha...main" --jq .status)
+          if [ "$status" != "identical" ] && [ "$status" != "ahead" ]; then
+            echo "::error::$sha is not on main"
+            exit 1
+          fi
+          # Only a push run counts: a pull request run tested the branch, not main.
+          # Filter with jq: the API returns nothing when --commit and --status are combined.
+          passed=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow validate.yml --commit "$sha" --json conclusion,event \
+            --jq '[.[] | select(.conclusion == "success" and .event == "push")] | length')
+          if [ "$passed" = "0" ]; then
+            echo "::error::validate has not passed on a push of $sha to main, so it can't be released"
+            exit 1
+          fi
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ steps.commit.outputs.sha }}
+
+      - name: Read the version
+        id: v
+        run: |
+          version=$(jq -r '.version // empty' .claude-plugin/plugin.json)
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::.claude-plugin/plugin.json version must be major.minor.patch, like 1.4.0 (got '$version')"
+            exit 1
+          fi
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+
+      - name: Stop if this version is already released
+        id: check
+        env:
+          TAG: ${{ steps.v.outputs.tag }}
+          SHA: ${{ steps.commit.outputs.sha }}
+        run: |
+          if draft=$(gh release view "$TAG" --json isDraft --jq .isDraft 2>/dev/null); then
+            if [ "$draft" = "true" ]; then
+              echo "Deleting the unfinished draft of $TAG from an earlier run"
+              gh release delete "$TAG" --yes
+            else
+              echo "$TAG is already released"
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+          # A tag pushed by hand would be reused by gh release create, ignoring
+          # --target, so the release would point at a different commit than the zips.
+          tag_sha=$(git ls-remote --tags origin "refs/tags/$TAG" "refs/tags/$TAG^{}" | tail -n 1 | cut -f1)
+          if [ -n "$tag_sha" ] && [ "$tag_sha" != "$SHA" ]; then
+            echo "::error::Tag $TAG already exists at $tag_sha, not $SHA. Delete or move the tag, then run this again."
+            exit 1
+          fi
+
+      - name: Build the zips
+        if: steps.check.outputs.skip != 'true'
+        run: |
+          if [ -e skills/userflow-all-ai-skills ]; then
+            echo "::error::A skill named userflow-all-ai-skills would be overwritten by the userflow-all-ai-skills.zip bundle. Rename the skill."
+            exit 1
+          fi
+          mkdir out
+          cd skills
+          for d in */; do
+            name="${d%/}"
+            zip -qrX "../out/$name.zip" "$name"
+          done
+          cd ..
+          zip -qrX out/userflow-all-ai-skills.zip skills
+
+      - name: Publish the release
+        if: steps.check.outputs.skip != 'true'
+        env:
+          TAG: ${{ steps.v.outputs.tag }}
+          SHA: ${{ steps.commit.outputs.sha }}
+        run: |
+          gh release create "$TAG" out/*.zip --draft --target "$SHA" --title "$TAG" --generate-notes
+          # The highest published version. Empty only when nothing is published yet;
+          # a failed lookup stops the step, so it can't make an older hotfix the latest.
+          current=$(gh release list --exclude-drafts --exclude-pre-releases --limit 1000 --json tagName --jq '.[].tagName' | sort -V | tail -n 1)
+          if [ -z "$current" ] || [ "$(printf '%s\n%s\n' "$current" "$TAG" | sort -V | tail -n 1)" = "$TAG" ]; then
+            gh release edit "$TAG" --draft=false --latest
+          else
+            gh release edit "$TAG" --draft=false --latest=false
+          fi
