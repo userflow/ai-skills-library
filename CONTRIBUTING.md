@@ -21,8 +21,9 @@ Open a pull request for every new skill, and for any change to an existing one t
 
 1. **Branch.** Create a branch from the latest `main`, for example `feat/<skill-name>`.
 2. **Write the skill.** Create `skills/<skill-name>/SKILL.md`. The folder name is the skill name and follows the `userflow-`* naming in the existing skills. Put long detail in `skills/<skill-name>/references/` and link to it from SKILL.md. Follow the [Rules](#rules) above, especially 4–9: spec-only frontmatter, under 500 lines, tool-neutral, a Trust boundary section if it reads end-user text, and a confirmation step before any write.
-3. **List it in two places:**
+3. **List it in three places:**
    - a row in the skills table in the [README](README.md#skills), under the group it belongs to
+   - a row in the [README Download table](README.md#download-skills) linking `https://github.com/userflow/ai-skills-library/releases/latest/download/<skill-name>.zip`
    - the matching group in [skills.sh.json](skills.sh.json)
 4. **Bump the version** in all six manifests (see [Release](#release), step 1). A new skill is a minor bump, for example 1.3.0 to 1.4.0.
 5. **Run the checks** from [Release](#release), step 2, and fix anything that fails. Try the skill in a real agent too (see [Test a local install](#test-a-local-install)): ask for what its description says and confirm it triggers.
@@ -43,6 +44,7 @@ Each release has to reach Claude Code, Codex, Cursor, Copilot, Gemini CLI and An
       for s in skills/*/; do npx --yes skills-ref validate "$s"; done
    ```
 3. CI runs the same checks on the push, plus the manifest schema checks and the Claude plugin directory checks (`claude plugin validate . --profile directory --strict`).
+4. When the version bump merges to `main` and validate passes, the `build-zips` workflow publishes GitHub release `v<version>` with one zip per skill plus `userflow-all-ai-skills.zip`. The README download links serve the highest version.
 
 ## Test a local install
 
