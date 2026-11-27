@@ -1,0 +1,86 @@
+name: build-zips
+
+on:
+  workflow_run:
+    workflows: [validate]
+    types: [completed]
+    branches: [main]
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-zips
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: >-
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push') ||
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.SHA }}
+
+      - name: Read the version
+        id: v
+        run: |
+          version=$(jq -r '.version // empty' .claude-plugin/plugin.json)
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::.claude-plugin/plugin.json version must be major.minor.patch, like 1.4.0 (got '$version')"
+            exit 1
+          fi
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+
+      - name: Stop if this version is already released
+        id: check
+        env:
+          TAG: ${{ steps.v.outputs.tag }}
+        run: |
+          if draft=$(gh release view "$TAG" --json isDraft --jq .isDraft 2>/dev/null); then
+            if [ "$draft" = "true" ]; then
+              echo "Deleting the unfinished draft of $TAG from an earlier run"
+              gh release delete "$TAG" --yes
+            else
+              echo "$TAG is already released"
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      - name: Build the zips
+        if: steps.check.outputs.skip != 'true'
+        run: |
+          if [ -e skills/userflow-all-ai-skills ]; then
+            echo "::error::A skill named userflow-all-ai-skills would be overwritten by the userflow-all-ai-skills.zip bundle. Rename the skill."
+            exit 1
+          fi
+          mkdir out
+          cd skills
+          for d in */; do
+            name="${d%/}"
+            zip -qrX "../out/$name.zip" "$name"
+          done
+          cd ..
+          zip -qrX out/userflow-all-ai-skills.zip skills
+
+      - name: Publish the release
+        if: steps.check.outputs.skip != 'true'
+        env:
+          TAG: ${{ steps.v.outputs.tag }}
+        run: |
+          gh release create "$TAG" out/*.zip --draft --target "$SHA" --title "$TAG" --generate-notes
+          current=$(gh release view --json tagName --jq .tagName 2>/dev/null || true)
+          if [ -z "$current" ] || [ "$(printf '%s\n%s\n' "$current" "$TAG" | sort -V | tail -n 1)" = "$TAG" ]; then
+            gh release edit "$TAG" --draft=false --latest
+          else
+            gh release edit "$TAG" --draft=false --latest=false
+          fi
